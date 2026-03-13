@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savelo Neo | Exclusive Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Hind+Siliguri:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        luxury: { blue: '#0F172A', gold: '#D4AF37', teal: '#14B8A6', dark: '#020617' }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'Hind Siliguri', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: radial-gradient(circle at top right, #1E3A8A 0%, #020617 100%);
+            min-height: 100vh;
+            color: white;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            transition: all 0.4s ease;
+        }
+        .gold-text {
+            background: linear-gradient(135deg, #FDE047 0%, #D4AF37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-premium {
+            background: linear-gradient(135deg, #FDE047 0%, #D4AF37 100%);
+            box-shadow: 0 10px 30px -10px rgba(212, 175, 55, 0.5);
+        }
+        .btn-premium:hover { transform: scale(1.02); filter: brightness(1.1); }
+        .active-section { display: block; animation: fadeIn 0.6s ease; }
+        .hidden-section { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #sidebar { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-open { transform: translateX(0); }
+        .sidebar-closed { transform: translateX(100%); }
+
+        /* Image upload zone */
+        .upload-zone {
+            border: 2px dashed rgba(212,175,55,0.3);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-zone:hover { border-color: rgba(212,175,55,0.7); background: rgba(212,175,55,0.05); }
+        .upload-zone.dragover { border-color: #D4AF37; background: rgba(212,175,55,0.1); }
+
+        /* QR Scanner */
+        #qr-reader { width: 100%; border-radius: 16px; overflow: hidden; }
+        #qr-reader video { border-radius: 16px; }
+        #qr-reader__scan_region { border-radius: 16px; }
+
+        /* Dashboard tab */
+        .dash-tab { transition: all 0.25s ease; }
+        .dash-tab.active { background: linear-gradient(135deg, #FDE047 0%, #D4AF37 100%); color: #000; font-weight: 700; }
+
+        /* Login type toggle */
+        .login-toggle { transition: all 0.3s ease; }
+        .login-toggle.active { background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.6); color: #FDE047; }
+
+        /* Discount badge */
+        .discount-badge { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.7;} }
+
+        /* Verify result */
+        .verify-valid { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.4); }
+        .verify-invalid { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); }
+
+        /* ★ Lock countdown */
+        @keyframes lockShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+        .lock-shake { animation: lockShake 0.5s ease; }
+        .lock-overlay { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.5); }
+
+        /* ★ SMS notification pop */
+        @keyframes slideDown { from{opacity:0;transform:translateY(-20px) translateX(-50%)} to{opacity:1;transform:translateY(0) translateX(-50%)} }
+        .sms-alert { animation: slideDown 0.4s ease; }
+
+        /* ★ Expired pulse */
+        @keyframes expiredPulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)} 50%{box-shadow:0 0 0 10px rgba(239,68,68,0)} }
+        .expired-pulse { animation: expiredPulse 1.5s infinite; }
+
+        /* ★ Profile card */
+        .profile-avatar { background: linear-gradient(135deg, #FDE047, #D4AF37); }
+        @keyframes verifySuccess { 0%{transform:scale(0.8);opacity:0} 60%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+        .verify-anim { animation: verifySuccess 0.5s ease forwards; }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 z-[300] bg-yellow-400 text-black px-8 py-3 rounded-full font-bold shadow-2xl hidden transition-all"></div>
+
+    <!-- ★ SMS-style Notification Alert -->
+    <div id="smsAlert" class="fixed top-20 left-1/2 z-[310] hidden sms-alert" style="transform:translateX(-50%);min-width:300px;max-width:90vw;">
+        <div class="glass-card p-4 border border-emerald-500/40 bg-emerald-500/10 flex items-start gap-3 shadow-2xl">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="bell" class="text-emerald-400 w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-[10px] font-black uppercase text-emerald-400 tracking-widest">Savelo Neo — নোটিফিকেশন</p>
+                <p id="smsAlertText" class="text-sm font-bold text-white mt-0.5 leading-snug"></p>
+                <p id="smsAlertTime" class="text-[10px] text-gray-400 mt-1"></p>
+            </div>
+            <button onclick="document.getElementById('smsAlert').classList.add('hidden')" class="text-gray-400 hover:text-white flex-shrink-0">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showSection('home')">
+                <div class="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center font-black text-black">SN</div>
+                <span class="text-xl font-bold tracking-tight uppercase">SAVELO <span class="gold-text">Neo</span></span>
+            </div>
+            
+            <div class="hidden md:flex gap-10 text-sm font-medium text-gray-400">
+                <button onclick="showSection('home')" class="hover:text-yellow-400 transition-colors">হোম</button>
+                <button onclick="showSection('shops')" class="hover:text-yellow-400 transition-colors">পার্টনার শপ</button>
+                <button onclick="showSection('agent')" class="hover:text-yellow-400 transition-colors">এজেন্ট</button>
+                <button onclick="showSection('dashboard')" class="hover:text-yellow-400 transition-colors">ড্যাশবোর্ড</button>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button onclick="showSection('buy')" class="btn-premium text-black text-xs font-bold px-6 py-3 rounded-full uppercase">Buy Now</button>
+                <button id="menuBtn" class="md:hidden text-white p-2 bg-white/5 rounded-lg border border-white/10">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidebar -->
+    <div id="sidebar" class="fixed inset-0 bg-black/98 z-[100] sidebar-closed md:hidden flex flex-col p-10 backdrop-blur-2xl">
+        <div class="flex justify-between items-center mb-16">
+            <span class="text-2xl font-bold gold-text tracking-widest">MENU</span>
+            <button id="closeBtn" class="p-3 bg-white/5 rounded-full"><i data-lucide="x"></i></button>
+        </div>
+        <div class="flex flex-col gap-8 text-3xl font-bold italic tracking-tighter">
+            <button onclick="showSection('home')" class="text-left flex items-center gap-4 hover:text-yellow-400"><i data-lucide="home"></i> হোম</button>
+            <button onclick="showSection('shops')" class="text-left flex items-center gap-4 hover:text-yellow-400"><i data-lucide="map-pin"></i> পার্টনার শপ</button>
+            <button onclick="showSection('agent')" class="text-left flex items-center gap-4 hover:text-yellow-400"><i data-lucide="briefcase"></i> এজেন্ট রেজিস্ট্রেশন</button>
+            <button onclick="showSection('dashboard')" class="text-left flex items-center gap-4 hover:text-yellow-400"><i data-lucide="layout-dashboard"></i> ড্যাশবোর্ড</button>
+            <button onclick="showSection('buy')" class="text-left flex items-center gap-4 hover:text-yellow-400"><i data-lucide="shopping-cart"></i> Buy Now</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="pt-32 pb-20 px-6 max-w-7xl mx-auto">
+
+        <!-- ========== 1. HOME SECTION ========== -->
+        <section id="home" class="active-section space-y-20">
+            <div class="text-center space-y-8">
+                <h1 class="text-5xl md:text-8xl font-bold tracking-tighter leading-[1.1]">Luxury Savings <br> <span class="gold-text italic">Modern Living.</span></h1>
+                <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">সাভেলো নিও কার্ডের সাথে উপভোগ করুন প্রিমিয়াম ডিসকাউন্ট এবং এক্সক্লুসিভ লাইফস্টাইল সুবিধা।</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="showSection('buy')" class="btn-premium text-black font-bold px-10 py-5 rounded-full text-lg">Get Your Card</button>
+                    <button onclick="showSection('buy')" class="glass-card px-10 py-5 rounded-full font-bold hover:bg-white/10">🎁 উপহার দিন</button>
+                </div>
+            </div>
+
+            <!-- Card Tiers -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-card p-10 border-teal-500/30 bg-teal-500/5 hover:border-teal-500/60 group">
+                    <h3 class="text-3xl font-bold text-teal-400 mb-2">ডিসকাউন্ট কার্ড</h3>
+                    <p class="text-gray-400 text-sm mb-6">সাশ্রয়ী কেনাকাটার নতুন দিগন্ত</p>
+                    <div class="mb-8">
+                        <p class="text-5xl font-bold italic text-white">৳ ৪৯৯</p>
+                        <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">বাৎসরিক মেম্বারশিপ</p>
+                    </div>
+                    <ul class="space-y-4 mb-10">
+                        <li class="flex items-center gap-3 text-sm text-gray-300"><i data-lucide="check-circle" class="text-teal-500 w-5 h-5"></i> লোকাল শপ ও ফার্মেসিতে আনলিমিটেড ছাড়।</li>
+                        <li class="flex items-center gap-3 text-sm font-bold text-white"><i data-lucide="shield-plus" class="text-emerald-400 w-5 h-5 animate-pulse"></i> 🛡️ লাইফ ইন্স্যুরেন্স সুবিধা (মেম্বারশিপ পিরিয়ডে)।</li>
+                    </ul>
+                    <button onclick="showSection('buy')" class="w-full py-5 rounded-2xl border border-teal-500/50 text-teal-400 font-bold hover:bg-teal-500 hover:text-white transition-all">Buy Teal Card</button>
+                </div>
+
+                <div class="glass-card p-10 border-yellow-400/30 bg-yellow-400/5 hover:border-yellow-400/60 group">
+                    <h3 class="text-3xl font-bold gold-text mb-2">সাভেলো নিও কার্ড</h3>
+                    <p class="text-gray-400 text-sm mb-6">প্রিমিয়াম লাইফস্টাইল ও VIP মর্যাদা</p>
+                    <div class="flex gap-6 items-end mb-8">
+                        <div>
+                            <p class="text-4xl font-bold italic text-white">৳ ১৯৯</p>
+                            <p class="text-[10px] text-gray-500 uppercase">মাসিক প্ল্যান</p>
+                        </div>
+                        <div class="h-10 w-px bg-white/10 mb-2"></div>
+                        <div>
+                            <p class="text-4xl font-bold italic gold-text">৳ ১৪৯৯</p>
+                            <p class="text-[10px] text-gray-500 uppercase">বাৎসরিক প্ল্যান</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 mb-10">
+                        <li class="flex items-center gap-3 text-sm text-gray-300"><i data-lucide="star" class="text-yellow-400 w-5 h-5"></i> এক্সক্লুসিভ ইভেন্ট ও VIP সুবিধা।</li>
+                        <li class="flex items-center gap-3 text-sm font-bold text-white"><i data-lucide="shield-check" class="text-emerald-400 w-5 h-5 animate-pulse"></i> 🛡️ লাইফ ইন্স্যুরেন্স সুবিধা (মেম্বারশিপ পিরিয়ডে)।</li>
+                    </ul>
+                    <button onclick="showSection('buy')" class="w-full py-5 rounded-2xl btn-premium text-black font-bold uppercase tracking-widest">Buy Gold Card</button>
+                </div>
+            </div>
+
+            <!-- Customer Stories -->
+            <div class="space-y-10">
+                <h2 class="text-3xl font-bold text-center gold-text italic">কাস্টমার স্টোরি</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-card p-8 border-l-4 border-yellow-400 bg-white/[0.02]">
+                        <p class="text-[10px] font-black uppercase text-yellow-400 mb-3 tracking-widest">Gift Card</p>
+                        <p class="text-sm italic text-gray-300 mb-6 leading-relaxed">"বিয়েতে ফ্রেন্ডকে গিফট কার্ড দিয়েছি, এটা ছিল তার পাওয়া ইউনিক গিফট! Savelo Neo কার্ড।।"</p>
+                        <h4 class="font-bold text-white">তানিয়া রহমান</h4>
+                    </div>
+                    <div class="glass-card p-8 border-l-4 border-teal-500 bg-white/[0.02]">
+                        <p class="text-[10px] font-black uppercase text-teal-400 mb-3 tracking-widest">Discount Card</p>
+                        <p class="text-sm italic text-gray-300 mb-6 leading-relaxed">"ডিসকাউন্ট কার্ড ব্যবহার করে গত মাসে আমার ১৫০০ টাকা সাশ্রয় হয়েছে।"</p>
+                        <h4 class="font-bold text-white">রবিন আহমেদ</h4>
+                    </div>
+                    <div class="glass-card p-8 border-l-4 border-purple-500 bg-white/[0.02]">
+                        <p class="text-[10px] font-black uppercase text-purple-400 mb-3 tracking-widest">VIP Card</p>
+                        <p class="text-sm italic text-gray-300 mb-6 leading-relaxed">"সেভলো নিও কার্ড দিয়ে এক্সক্লুসিভ ইভেন্টে ফ্রিতে এন্ট্রি পেয়েছি। হাজারো শপে ডিসকাউন্ট উপভোগ করছি।"</p>
+                        <h4 class="font-bold text-white">শাওন খান</h4>
+                    </div>
+                    <div class="glass-card p-8 border-l-4 border-emerald-500 bg-white/[0.02]">
+                        <p class="text-[10px] font-black uppercase text-emerald-400 mb-3 tracking-widest">Hybrid</p>
+                        <p class="text-sm italic text-gray-300 mb-6 leading-relaxed">"উপহার এবং সাশ্রয়—দুই সুবিধার দারুণ কম্বিনেশন।"</p>
+                        <h4 class="font-bold text-white">মেহেদী হাসান</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="max-w-2xl mx-auto space-y-4">
+                <h2 class="text-3xl font-bold text-center gold-text mb-10 italic uppercase tracking-tighter">সাধারণ জিজ্ঞাসা (FAQ)</h2>
+                <div class="glass-card overflow-hidden transition-all duration-300 border-white/5">
+                    <button onclick="toggleFaq(1)" class="w-full p-6 flex justify-between items-center font-bold text-sm text-left hover:bg-white/5 transition-colors">
+                        <span>কার্ডের মেয়াদ কতদিন থাকবে?</span>
+                        <i id="fi-1" data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div id="fq-1" class="hidden px-6 pb-6 text-xs text-gray-400 leading-relaxed border-t border-white/5 pt-4">
+                        আপনার কার্ডটি অ্যাক্টিভেশনের তারিখ থেকে ১ বছর পর্যন্ত মেয়াদ থাকবে। বাৎসরিক প্ল্যানটি রিনিউ করার মাধ্যমে আপনি অবিচ্ছিন্ন সুবিধা উপভোগ করতে পারবেন।
+                    </div>
+                </div>
+                <div class="glass-card overflow-hidden transition-all duration-300 border-white/5">
+                    <button onclick="toggleFaq(2)" class="w-full p-6 flex justify-between items-center font-bold text-sm text-left hover:bg-white/5 transition-colors">
+                        <span>কিভাবে ডিসকাউন্ট বা গিফট কার্ড ব্যবহার করবেন?</span>
+                        <i id="fi-2" data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div id="fq-2" class="hidden px-6 pb-6 text-xs text-gray-400 leading-relaxed border-t border-white/5 pt-4">
+                        যেকোনো পার্টনার শপে কেনাকাটার সময় আপনার সাভেলো নিও কার্ড শো করুন। আমাদের এজেন্টরা তাৎক্ষণিক আপনার টোটাল বিল থেকে ডিসকাউন্ট কার্যকর করবেন।
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 2. REGISTRATION (BUY) ========== -->
+        <section id="buy" class="hidden-section max-w-xl mx-auto">
+            <div class="glass-card p-10 space-y-6">
+                <h2 class="text-2xl font-bold gold-text text-center uppercase italic">Activation Form</h2>
+                <div class="space-y-4">
+                    <input type="text" placeholder="Referral ID (যদি থাকে)" class="w-full bg-white/5 border border-yellow-400/40 p-4 rounded-xl outline-none focus:ring-2 ring-yellow-400/20 font-bold text-yellow-400 placeholder-yellow-400/50">
+                    <input type="text" placeholder="Card ID (SN-XXXX)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+                    <input type="text" placeholder="পূর্ণ নাম" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+                    <input type="number" placeholder="মোবাইল নম্বর" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+                    <input type="password" maxlength="4" placeholder="৪ সংখ্যার পিন সেট করুন" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-center text-4xl tracking-widest font-bold">
+                    <div class="p-4 bg-yellow-400/10 rounded-xl border border-yellow-400/20 text-xs text-center">
+                        <p class="mb-2 text-gray-400 font-bold">পেমেন্ট নম্বর: 01337147436</p>
+                        <input type="text" placeholder="TrxID প্রদান করুন" class="w-full p-3 bg-black/40 rounded-lg outline-none border border-white/5">
+                    </div>
+                    <button class="w-full btn-premium py-5 rounded-xl text-black font-black uppercase text-lg">Activate Now</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 3. AGENT REGISTRATION ========== -->
+        <section id="agent" class="hidden-section max-w-2xl mx-auto space-y-8">
+            <div class="text-center space-y-4">
+                <h2 class="text-4xl font-bold gold-text italic uppercase">এজেন্ট রেজিস্ট্রেশন</h2>
+                <p class="text-gray-400">আপনার দোকানের লাইভ লোকেশন দিয়ে এজেন্টশিপ নিশ্চিত করুন।</p>
+            </div>
+            <div class="glass-card p-10 space-y-6">
+                <input type="text" placeholder="মালিকের নাম" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+                <input type="text" placeholder="দোকানের নাম" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+
+                <!-- ★ NEW: Shop Image Upload -->
+                <div>
+                    <p class="text-xs text-gray-400 font-bold mb-2 uppercase tracking-widest">দোকানের ছবি আপলোড করুন</p>
+                    <div class="upload-zone p-6 text-center relative" id="uploadZone" onclick="document.getElementById('shopImageInput').click()">
+                        <input type="file" id="shopImageInput" accept="image/*" multiple class="hidden" onchange="handleShopImages(event)">
+                        <div id="uploadPlaceholder" class="space-y-3">
+                            <div class="w-12 h-12 mx-auto bg-yellow-400/10 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="image-plus" class="text-yellow-400 w-6 h-6"></i>
+                            </div>
+                            <p class="text-sm font-bold text-gray-300">ছবি ক্লিক করে বা ড্র্যাগ করে আপলোড করুন</p>
+                            <p class="text-[10px] text-gray-500">JPG, PNG সর্বোচ্চ ৫ MB — সর্বোচ্চ ৩টি ছবি</p>
+                        </div>
+                        <div id="imagePreviewGrid" class="hidden grid grid-cols-3 gap-3 mt-2"></div>
+                    </div>
+                </div>
+                
+                <!-- Live Location -->
+                <div class="p-4 bg-white/5 border-2 border-dashed border-white/10 rounded-2xl text-center space-y-3">
+                    <p class="text-xs text-gray-400 italic">কাস্টমার আপনার দোকানে আসার জন্য লাইভ লোকেশন প্রয়োজন</p>
+                    <button onclick="captureLocation()" id="locBtn" class="flex items-center gap-2 mx-auto bg-yellow-400 text-black font-bold px-6 py-3 rounded-full hover:scale-105 transition-transform">
+                        <i data-lucide="map-pin"></i> লাইভ লোকেশন সেট করুন
+                    </button>
+                    <p id="locStatus" class="text-[10px] text-emerald-400 font-bold uppercase"></p>
+                </div>
+
+                <input type="number" placeholder="মোবাইল নম্বর" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+                <input type="password" maxlength="4" placeholder="এজেন্ট পিন সেট করুন (৪ সংখ্যা)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-center text-3xl tracking-widest font-bold outline-none">
+
+                <div class="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-4">
+                    <p class="text-xs text-yellow-400 font-bold">এজেন্ট ফি: ৫০০০/- (অফেরতযোগ্য)</p>
+                    <input type="text" placeholder="বিকাশ/নগদ TrxID" class="w-full p-4 bg-black/40 rounded-xl outline-none border border-white/5">
+                </div>
+                <button class="w-full btn-premium py-5 rounded-xl text-black font-black uppercase">Submit Agent Application</button>
+            </div>
+        </section>
+
+        <!-- ========== 4. DASHBOARD SECTION ========== -->
+        <section id="dashboard" class="hidden-section">
+
+            <!-- LOGIN VIEW -->
+            <div id="loginView" class="max-w-md mx-auto py-10 space-y-6">
+                <!-- ★ NEW: Login type toggle -->
+                <div class="flex rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-1 gap-1">
+                    <button onclick="setLoginType('customer')" id="toggleCustomer" class="login-toggle active flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4"></i> কাস্টমার
+                    </button>
+                    <button onclick="setLoginType('agent')" id="toggleAgent" class="login-toggle flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 text-gray-400">
+                        <i data-lucide="store" class="w-4 h-4"></i> এজেন্ট / দোকানদার
+                    </button>
+                </div>
+
+                <div class="glass-card p-12 space-y-8">
+                    <div class="text-center">
+                        <div id="loginIcon" class="w-16 h-16 mx-auto bg-yellow-400/10 rounded-2xl flex items-center justify-center mb-4">
+                            <i data-lucide="user" class="text-yellow-400 w-8 h-8"></i>
+                        </div>
+                        <h3 id="loginTitle" class="text-xl font-bold uppercase tracking-widest">কাস্টমার লগইন</h3>
+                        <p id="loginSub" class="text-xs text-gray-400 mt-1">৪ সংখ্যার পিন দিয়ে লগইন করুন</p>
+                    </div>
+                    <input type="password" id="loginPin" maxlength="4" placeholder="••••" class="w-full bg-white/5 border border-white/10 p-5 rounded-xl text-center text-5xl font-bold outline-none focus:border-yellow-400">
+                    <button onclick="mockLogin()" class="w-full btn-premium text-black font-bold py-5 rounded-xl">Unlock Dashboard</button>
+                </div>
+            </div>
+
+            <!-- CUSTOMER DASHBOARD -->
+            <div id="customerDashboard" class="hidden space-y-8">
+                <!-- Header -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest">স্বাগতম</p>
+                        <h2 class="text-2xl font-bold gold-text">রবিন আহমেদ</h2>
+                    </div>
+                    <button onclick="logoutDashboard()" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1 bg-white/5 px-4 py-2 rounded-full">
+                        <i data-lucide="log-out" class="w-3 h-3"></i> লগআউট
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-8">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">Membership Status</p>
+                        <h2 class="text-2xl font-bold mt-2 text-yellow-400">Premium Member</h2>
+                        <p class="text-[10px] text-emerald-400 font-bold mt-1">Expires: 12 Dec 2026</p>
+                    </div>
+                    <div class="glass-card p-8">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">Your Card ID</p>
+                        <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl mt-3">
+                            <span class="text-yellow-400 font-mono text-xl">SN-10254</span>
+                            <button onclick="copyCode('SN-10254')" class="text-gray-400 hover:text-yellow-400"><i data-lucide="copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="glass-card p-8">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">মোট সাশ্রয়</p>
+                        <h2 class="text-2xl font-bold mt-2 text-emerald-400">৳ ৩,৪৫০</h2>
+                        <p class="text-[10px] text-gray-400 mt-1">এই মাসে</p>
+                    </div>
+                </div>
+
+                <!-- Customer Menu Tabs -->
+                <div class="glass-card p-2 flex gap-2 overflow-x-auto">
+                    <button onclick="showDashTab('myCard')" class="dash-tab active text-xs font-bold px-5 py-3 rounded-xl whitespace-nowrap flex items-center gap-2" data-tab="myCard">
+                        <i data-lucide="credit-card" class="w-4 h-4"></i> আমার কার্ড
+                    </button>
+                    <button onclick="showDashTab('scanQR')" class="dash-tab text-xs font-bold px-5 py-3 rounded-xl whitespace-nowrap text-gray-400 flex items-center gap-2" data-tab="scanQR">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i> QR স্ক্যান
+                    </button>
+                    <button onclick="showDashTab('history')" class="dash-tab text-xs font-bold px-5 py-3 rounded-xl whitespace-nowrap text-gray-400 flex items-center gap-2" data-tab="history">
+                        <i data-lucide="history" class="w-4 h-4"></i> লেনদেন ইতিহাস
+                    </button>
+                </div>
+
+                <!-- Tab: My Card -->
+                <div id="tab-myCard" class="space-y-6">
+                    <div class="glass-card p-8 bg-gradient-to-br from-yellow-400/10 to-transparent border-yellow-400/20 space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest">Savelo Neo Card</p>
+                                <h3 class="text-xl font-bold mt-1">রবিন আহমেদ</h3>
+                            </div>
+                            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full font-bold">Active ✓</span>
+                        </div>
+                        <div class="text-center py-4">
+                            <canvas id="customerQRCanvas" width="160" height="160" class="mx-auto rounded-xl bg-white p-2"></canvas>
+                            <p class="text-[10px] text-gray-400 mt-2">আপনার কার্ড QR কোড</p>
+                        </div>
+                        <div class="flex justify-between items-center bg-black/30 p-4 rounded-xl">
+                            <span class="font-mono text-yellow-400 font-bold">SN-10254</span>
+                            <span class="text-xs text-gray-400">Gold Member</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: QR Scanner -->
+                <div id="tab-scanQR" class="hidden space-y-6">
+                    <div class="glass-card p-8 space-y-4">
+                        <h3 class="font-bold text-lg">QR কোড স্ক্যান করুন</h3>
+                        <p class="text-xs text-gray-400">এজেন্টের QR স্ক্যান করুন অথবা পার্টনার শপ যাচাই করুন।</p>
+                        <div class="rounded-2xl overflow-hidden bg-black/30">
+                            <div id="qr-reader-customer"></div>
+                        </div>
+                        <div id="customerScanResult" class="hidden glass-card p-4 border-emerald-500/30 bg-emerald-500/5 text-sm text-emerald-300 font-bold text-center rounded-xl"></div>
+                        <div class="flex gap-3">
+                            <button onclick="startCustomerScanner()" class="flex-1 btn-premium text-black font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                                <i data-lucide="camera" class="w-4 h-4"></i> স্ক্যানার চালু করুন
+                            </button>
+                            <button onclick="stopCustomerScanner()" class="flex-1 bg-white/5 border border-white/10 py-3 rounded-xl text-sm font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="video-off" class="w-4 h-4"></i> বন্ধ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Transaction History -->
+                <div id="tab-history" class="hidden space-y-4">
+                    <div class="glass-card p-6 space-y-4">
+                        <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400">সাম্প্রতিক লেনদেন</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
+                                <div>
+                                    <p class="text-sm font-bold">এলিট ফ্যাশন হাউজ</p>
+                                    <p class="text-[10px] text-gray-400">১২ মার্চ ২০২৬ — ১৫% ডিসকাউন্ট</p>
+                                </div>
+                                <span class="text-emerald-400 font-bold text-sm">-৳ ৪৫০</span>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
+                                <div>
+                                    <p class="text-sm font-bold">মেডিপ্লাস ফার্মেসি</p>
+                                    <p class="text-[10px] text-gray-400">১০ মার্চ ২০২৬ — ১০% ডিসকাউন্ট</p>
+                                </div>
+                                <span class="text-emerald-400 font-bold text-sm">-৳ ২৩০</span>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
+                                <div>
+                                    <p class="text-sm font-bold">City Café</p>
+                                    <p class="text-[10px] text-gray-400">৮ মার্চ ২০২৬ — ২০% ডিসকাউন্ট</p>
+                                </div>
+                                <span class="text-emerald-400 font-bold text-sm">-৳ ৩২০</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGENT DASHBOARD -->
+            <div id="agentDashboard" class="hidden space-y-8">
+                <!-- Header -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest">এজেন্ট প্যানেল</p>
+                        <h2 class="text-2xl font-bold text-teal-400">এলিট ফ্যাশন হাউজ</h2>
+                    </div>
+                    <button onclick="logoutDashboard()" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1 bg-white/5 px-4 py-2 rounded-full">
+                        <i data-lucide="log-out" class="w-3 h-3"></i> লগআউট
+                    </button>
+                </div>
+
+                <!-- Agent Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-8 border-teal-500/20">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">আজকের লেনদেন</p>
+                        <h2 class="text-2xl font-bold mt-2 text-teal-400">১২ টি</h2>
+                    </div>
+                    <div class="glass-card p-8 border-teal-500/20">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">মোট ডিসকাউন্ট দিয়েছেন</p>
+                        <h2 class="text-2xl font-bold mt-2 text-yellow-400">৳ ৫,৬৮০</h2>
+                    </div>
+                    <div class="glass-card p-8 border-teal-500/20 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">এজেন্ট স্ট্যাটাস</p>
+                            <h2 class="text-lg font-bold mt-2 text-emerald-400">Active ✓</h2>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center">
+                            <i data-lucide="shield-check" class="text-emerald-400 w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Menu Tabs -->
+                <div class="glass-card p-2 flex gap-2 overflow-x-auto">
+                    <button onclick="showAgentTab('verifyCard')" class="dash-tab active text-xs font-bold px-5 py-3 rounded-xl whitespace-nowrap flex items-center gap-2" data-agtab="verifyCard">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i> কার্ড স্ক্যান ও ভেরিফাই
+                    </button>
+                    <button onclick="showAgentTab('applyDiscount')" class="dash-tab text-xs font-bold px-5 py-3 rounded-xl whitespace-nowrap text-gray-400 flex items-center gap-2" data-agtab="applyDiscount">
+                        <i data-lucide="badge-percent" class="w-4 h-4"></i> ডিসকাউন্ট অ্যাপ্লাই
+                    </button>
+                    <button onclick="showAgentTab('agentQR')" class="dash-tab text-xs font-bold px-5 py-3 rounded-xl whitespace-nowrap text-gray-400 flex items-center gap-2" data-agtab="agentQR">
+                        <i data-lucide="qr-code" class="w-4 h-4"></i> আমার QR কোড
+                    </button>
+                    <button onclick="showAgentTab('agentHistory')" class="dash-tab text-xs font-bold px-5 py-3 rounded-xl whitespace-nowrap text-gray-400 flex items-center gap-2" data-agtab="agentHistory">
+                        <i data-lucide="history" class="w-4 h-4"></i> ইতিহাস
+                    </button>
+                </div>
+
+                <!-- Agent Tab: Verify Card -->
+                <div id="agtab-verifyCard" class="space-y-6">
+                    <div class="glass-card p-8 space-y-5">
+                        <h3 class="font-bold text-lg">কাস্টমারের কার্ড স্ক্যান করুন</h3>
+                        <p class="text-xs text-gray-400">QR স্ক্যান করুন অথবা কার্ড ID ম্যানুয়ালি লিখুন।</p>
+
+                        <!-- QR Scanner Area -->
+                        <div class="rounded-2xl overflow-hidden bg-black/30 border border-white/5">
+                            <div id="qr-reader-agent"></div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button onclick="startAgentScanner()" class="flex-1 bg-teal-500/20 border border-teal-500/40 text-teal-400 font-bold py-3 rounded-xl text-sm hover:bg-teal-500/30 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="camera" class="w-4 h-4"></i> স্ক্যানার চালু
+                            </button>
+                            <button onclick="stopAgentScanner()" class="flex-1 bg-white/5 border border-white/10 py-3 rounded-xl text-sm font-bold hover:bg-white/10 flex items-center justify-center gap-2">
+                                <i data-lucide="video-off" class="w-4 h-4"></i> বন্ধ করুন
+                            </button>
+                        </div>
+
+                        <!-- Manual Entry -->
+                        <div class="flex gap-3">
+                            <input type="text" id="manualCardId" placeholder="Card ID ম্যানুয়ালি লিখুন (SN-XXXX)" class="flex-1 bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-teal-500 text-sm">
+                            <button onclick="verifyCardManual()" class="bg-teal-500/20 border border-teal-500/40 text-teal-400 px-6 rounded-xl font-bold text-sm hover:bg-teal-500/30 transition-all">যাচাই</button>
+                        </div>
+
+                        <!-- Verify Result -->
+                        <div id="verifyResult" class="hidden glass-card p-6 rounded-xl space-y-3">
+                            <div id="verifyStatus" class="text-center text-lg font-black"></div>
+                            <div id="verifyDetails" class="space-y-2 text-xs text-gray-300"></div>
+                            <button onclick="goToDiscount()" id="applyDiscountBtn" class="hidden w-full btn-premium text-black font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                                <i data-lucide="badge-percent" class="w-4 h-4"></i> ডিসকাউন্ট অ্যাপ্লাই করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Tab: Apply Discount -->
+                <div id="agtab-applyDiscount" class="hidden space-y-6">
+                    <div class="glass-card p-8 space-y-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-yellow-400/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="badge-percent" class="text-yellow-400 w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg">ডিসকাউন্ট ক্যালকুলেটর</h3>
+                                <p id="discountCardInfo" class="text-xs text-gray-400">কার্ড: SN-10254 — Gold Member</p>
+                            </div>
+                        </div>
+
+                        <!-- Bill Input -->
+                        <div>
+                            <label class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-2 block">মোট বিলের পরিমাণ (৳)</label>
+                            <input type="number" id="totalBillInput" placeholder="যেমন: ২০০০" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-yellow-400 text-2xl font-bold" oninput="calculateDiscount()">
+                        </div>
+
+                        <!-- Discount Rate -->
+                        <div>
+                            <label class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-2 block">ডিসকাউন্ট রেট নির্বাচন করুন</label>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button onclick="selectRate(5)" class="rate-btn py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-bold hover:border-yellow-400/50 transition-all">5%</button>
+                                <button onclick="selectRate(10)" class="rate-btn py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-bold hover:border-yellow-400/50 transition-all">10%</button>
+                                <button onclick="selectRate(15)" class="rate-btn py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-bold hover:border-yellow-400/50 transition-all">15%</button>
+                                <button onclick="selectRate(20)" class="rate-btn py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-bold hover:border-yellow-400/50 transition-all">20%</button>
+                            </div>
+                        </div>
+
+                        <!-- Result -->
+                        <div id="discountResult" class="hidden bg-gradient-to-br from-yellow-400/10 to-emerald-500/10 border border-yellow-400/20 rounded-2xl p-6 space-y-4">
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div>
+                                    <p class="text-[10px] text-gray-400 uppercase tracking-widest">মূল বিল</p>
+                                    <p id="origBill" class="text-lg font-bold text-white mt-1">৳ ০</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-400 uppercase tracking-widest">ছাড়</p>
+                                    <p id="discAmount" class="text-lg font-bold text-red-400 mt-1">-৳ ০</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-400 uppercase tracking-widest">প্রদেয় বিল</p>
+                                    <p id="finalBill" class="text-lg font-bold text-emerald-400 mt-1">৳ ০</p>
+                                </div>
+                            </div>
+                            <button onclick="confirmDiscount()" class="w-full btn-premium text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i> ডিসকাউন্ট কনফার্ম করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Tab: My QR -->
+                <div id="agtab-agentQR" class="hidden space-y-6">
+                    <div class="glass-card p-8 text-center space-y-6">
+                        <h3 class="font-bold text-lg">আমার দোকানের QR কোড</h3>
+                        <p class="text-xs text-gray-400">কাস্টমার এই QR স্ক্যান করে আপনার দোকান ভেরিফাই করতে পারবেন।</p>
+                        <div class="flex justify-center">
+                            <canvas id="agentQRCanvas" width="200" height="200" class="rounded-xl bg-white p-3"></canvas>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-xl">
+                            <p class="text-teal-400 font-mono font-bold">AG-55821</p>
+                            <p class="text-[10px] text-gray-400 mt-1">এলিট ফ্যাশন হাউজ — ডিবি রোড, গাইবান্ধা</p>
+                        </div>
+                        <button onclick="downloadAgentQR()" class="mx-auto flex items-center gap-2 bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-sm font-bold hover:bg-white/10 transition-all">
+                            <i data-lucide="download" class="w-4 h-4"></i> QR ডাউনলোড করুন
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Agent Tab: History -->
+                <div id="agtab-agentHistory" class="hidden space-y-4">
+                    <div class="glass-card p-6 space-y-4">
+                        <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400">সাম্প্রতিক ট্রানজেকশন</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
+                                <div>
+                                    <p class="text-sm font-bold">SN-10254 — রবিন আহমেদ</p>
+                                    <p class="text-[10px] text-gray-400">আজ ১১:৩৫ AM — ১৫% ডিসকাউন্ট</p>
+                                </div>
+                                <span class="text-teal-400 font-bold text-sm">৳ ৩,০০০ → ৳ ২,৫৫০</span>
+                            </div>
+                            <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
+                                <div>
+                                    <p class="text-sm font-bold">SN-20834 — তানিয়া রহমান</p>
+                                    <p class="text-[10px] text-gray-400">আজ ১০:১২ AM — ১০% ডিসকাউন্ট</p>
+                                </div>
+                                <span class="text-teal-400 font-bold text-sm">৳ ১,৮০০ → ৳ ১,৬২০</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 5. PARTNER SHOPS ========== -->
+        <section id="shops" class="hidden-section space-y-8">
+            <h2 class="text-4xl font-bold gold-text italic">নিকটস্থ পার্টনার শপ</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-card p-8 space-y-6 group">
+                    <div>
+                        <h4 class="text-xl font-bold">এলিট ফ্যাশন হাউজ</h4>
+                        <p class="text-xs text-gray-400 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-yellow-400"></i> ডিবি রোড গাইবান্ধা</p>
+                    </div>
+                    <div class="h-px bg-white/5 w-full"></div>
+                    <p class="text-[10px] text-gray-500 leading-relaxed italic">আমাদের শপে সকল সাভেলো নিও কার্ড হোল্ডারদের জন্য ১৫% পর্যন্ত নগদ ডিসকাউন্ট প্রযোজ্য।</p>
+                    <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=23.7925,90.4255')" class="w-full py-4 bg-white/5 rounded-xl text-[10px] font-bold uppercase hover:bg-yellow-400 hover:text-black transition-all">লোকেশন দেখে দোকানে যান</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 6. ADMIN SECTION ========== -->
+        <section id="admin" class="hidden-section">
+
+            <!-- Admin Login -->
+            <div id="adminLoginView" class="max-w-md mx-auto py-10 space-y-6">
+                <div class="text-center space-y-2">
+                    <div class="w-16 h-16 mx-auto bg-red-500/10 rounded-2xl flex items-center justify-center mb-4">
+                        <i data-lucide="shield-alert" class="text-red-400 w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-black uppercase tracking-widest text-red-400">Admin Access</h2>
+                    <p class="text-xs text-gray-500">শুধুমাত্র অথরাইজড ব্যক্তির জন্য</p>
+                </div>
+                <div class="glass-card p-8 space-y-5 border-red-500/20">
+                    <input type="text" id="adminEmailInput" placeholder="Username / Email" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-red-500/60 text-sm" onkeydown="if(event.key==='Enter') adminLogin()">
+                    <input type="password" id="adminPassInput" placeholder="পাসওয়ার্ড" class="w-full bg-white/5 border border-red-500/20 p-4 rounded-xl outline-none focus:border-red-500/60 font-bold text-lg tracking-widest" onkeydown="if(event.key==='Enter') adminLogin()">
+                    <p id="adminLoginError" class="text-xs text-red-400 font-bold text-center hidden">❌ ভুল Username বা Password!</p>
+                    <button onclick="adminLogin()" class="w-full bg-red-500/20 border border-red-500/40 text-red-400 font-black py-4 rounded-xl hover:bg-red-500/30 transition-all uppercase tracking-widest">
+                        প্রবেশ করুন
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="hidden space-y-6">
+
+                <!-- Header with role badge -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div id="adminRoleIcon" class="w-12 h-12 rounded-2xl flex items-center justify-center">
+                            <i data-lucide="crown" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 id="adminWelcomeName" class="text-xl font-black"></h2>
+                                <span id="adminRoleBadge" class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest"></span>
+                            </div>
+                            <p id="adminRoleDesc" class="text-[10px] text-gray-400 mt-0.5"></p>
+                        </div>
+                    </div>
+                    <button onclick="adminLogout()" class="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                        <i data-lucide="log-out" class="w-3 h-3"></i> লগআউট
+                    </button>
+                </div>
+
+                <!-- Stats (always visible) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="glass-card p-5 border-yellow-400/10">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">মোট কার্ড</p>
+                        <h3 class="text-3xl font-black text-yellow-400 mt-1">১,২৪৭</h3>
+                        <p class="text-[10px] text-emerald-400 mt-1">↑ ৩২ এই মাসে</p>
+                    </div>
+                    <div class="glass-card p-5 border-teal-500/10">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">অ্যাক্টিভ এজেন্ট</p>
+                        <h3 class="text-3xl font-black text-teal-400 mt-1">৮৪</h3>
+                        <p class="text-[10px] text-yellow-400 mt-1">৭ পেন্ডিং</p>
+                    </div>
+                    <div class="glass-card p-5 border-emerald-500/10">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">মোট ডিসকাউন্ট</p>
+                        <h3 class="text-3xl font-black text-emerald-400 mt-1">৳ ৪.২L</h3>
+                    </div>
+                    <div class="glass-card p-5 border-purple-500/10">
+                        <p class="text-[10px] uppercase text-gray-500 font-bold tracking-widest">মোট আয়</p>
+                        <h3 class="text-3xl font-black text-purple-400 mt-1">৳ ৬.৮L</h3>
+                    </div>
+                </div>
+
+                <!-- Role-based Tab Menu -->
+                <div id="adminTabBar" class="glass-card p-2 flex gap-1.5 overflow-x-auto flex-wrap"></div>
+
+                <!-- ── TAB: সব কার্ড ── -->
+                <div id="admintab-allCards" class="hidden space-y-4">
+                    <div class="glass-card p-6 space-y-4">
+                        <div class="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
+                            <h3 class="font-bold uppercase tracking-widest text-xs text-gray-400">কার্ড হোল্ডার লিস্ট</h3>
+                            <div class="flex gap-2 w-full md:w-auto">
+                                <input type="text" id="cardSearchInput" placeholder="নাম বা Card ID..." oninput="filterCards()" class="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm">
+                                <select id="cardStatusFilter" onchange="filterCards()" class="bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-sm text-gray-300">
+                                    <option value="all">সব</option>
+                                    <option value="active">Active</option>
+                                    <option value="expired">Expired</option>
+                                    <option value="blocked">Blocked</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="cardListTable" class="space-y-2 max-h-96 overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+                <!-- ── TAB: এজেন্ট অ্যাপ্রুভাল ── -->
+                <div id="admintab-agentApprovals" class="hidden space-y-4">
+                    <div class="glass-card p-6 space-y-4">
+                        <h3 class="font-bold uppercase tracking-widest text-xs text-gray-400">পেন্ডিং এজেন্ট আবেদন</h3>
+                        <div id="agentApprovalList" class="space-y-3"></div>
+                    </div>
+                    <div class="glass-card p-6 space-y-4">
+                        <h3 class="font-bold uppercase tracking-widest text-xs text-gray-400">অ্যাপ্রুভড এজেন্ট</h3>
+                        <div id="approvedAgentList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- ── TAB: কার্ড যোগ / ব্লক ── -->
+                <div id="admintab-addCard" class="hidden space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-8 space-y-4 border-emerald-500/10">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center"><i data-lucide="plus-circle" class="text-emerald-400 w-5 h-5"></i></div>
+                                <h3 class="font-bold">নতুন কার্ড যোগ</h3>
+                            </div>
+                            <input type="text" id="newCardId" placeholder="Card ID (SN-XXXX)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-emerald-500 text-sm">
+                            <input type="text" id="newCardName" placeholder="কার্ড হোল্ডারের নাম" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-emerald-500 text-sm">
+                            <input type="text" id="newCardPhone" placeholder="মোবাইল নম্বর" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-emerald-500 text-sm">
+                            <select id="newCardType" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-sm text-gray-300">
+                                <option value="Gold Member">Gold Member</option>
+                                <option value="Premium Member">Premium Member</option>
+                                <option value="Basic">Basic</option>
+                            </select>
+                            <input type="text" id="newCardExpiry" placeholder="মেয়াদ (31 Dec 2026)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-emerald-500 text-sm">
+                            <input type="number" id="newCardDiscount" placeholder="ডিসকাউন্ট % (15)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-emerald-500 text-sm">
+                            <button onclick="adminAddCard()" class="w-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-bold py-3 rounded-xl hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="plus" class="w-4 h-4"></i> কার্ড যোগ করুন
+                            </button>
+                        </div>
+                        <div class="glass-card p-8 space-y-4 border-red-500/10">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-9 h-9 bg-red-500/10 rounded-xl flex items-center justify-center"><i data-lucide="ban" class="text-red-400 w-5 h-5"></i></div>
+                                <h3 class="font-bold">কার্ড ব্লক / আনব্লক</h3>
+                            </div>
+                            <input type="text" id="blockCardId" placeholder="Card ID (SN-XXXX)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-red-500 text-sm">
+                            <div id="blockCardPreview" class="hidden p-4 bg-white/5 rounded-xl text-sm space-y-1"></div>
+                            <div class="flex gap-2">
+                                <button onclick="adminFindCard()" class="flex-1 bg-white/5 border border-white/10 py-3 rounded-xl font-bold text-sm hover:bg-white/10 transition-all">খুঁজুন</button>
+                                <button onclick="adminBlockCard()" class="flex-1 bg-red-500/20 border border-red-500/30 text-red-400 py-3 rounded-xl font-bold text-sm hover:bg-red-500/30 flex items-center justify-center gap-1"><i data-lucide="ban" class="w-3 h-3"></i>ব্লক</button>
+                                <button onclick="adminUnblockCard()" class="flex-1 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 py-3 rounded-xl font-bold text-sm hover:bg-emerald-500/30 flex items-center justify-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i>আনব্লক</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TAB: ল্যান্ডিং পেজ এডিট ── -->
+                <div id="admintab-editLanding" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Hero Section Edit -->
+                        <div class="glass-card p-8 space-y-4 border-yellow-400/10">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-9 h-9 bg-yellow-400/10 rounded-xl flex items-center justify-center"><i data-lucide="type" class="text-yellow-400 w-5 h-5"></i></div>
+                                <h3 class="font-bold">Hero সেকশন</h3>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 block">হেডলাইন লাইন ১</label>
+                                <input type="text" id="editHero1" value="Luxury Savings" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm font-bold">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 block">হেডলাইন লাইন ২</label>
+                                <input type="text" id="editHero2" value="Modern Living." class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm font-bold">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 block">সাবটাইটেল</label>
+                                <textarea id="editSubtitle" rows="3" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm resize-none">সাভেলো নিও কার্ডের সাথে উপভোগ করুন প্রিমিয়াম ডিসকাউন্ট এবং এক্সক্লুসিভ লাইফস্টাইল সুবিধা।</textarea>
+                            </div>
+                            <button onclick="applyHeroEdit()" class="w-full btn-premium text-black font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i> লাইভ আপডেট করুন
+                            </button>
+                        </div>
+                        <!-- Card Pricing Edit -->
+                        <div class="glass-card p-8 space-y-4 border-teal-500/10">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-9 h-9 bg-teal-500/10 rounded-xl flex items-center justify-center"><i data-lucide="tag" class="text-teal-400 w-5 h-5"></i></div>
+                                <h3 class="font-bold">কার্ড প্রাইসিং</h3>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 block">ডিসকাউন্ট কার্ড মূল্য (৳)</label>
+                                <input type="number" id="editDiscountPrice" value="499" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-teal-500 text-sm font-bold">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 block">নিও কার্ড মাসিক (৳)</label>
+                                <input type="number" id="editNeoMonthly" value="199" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-teal-500 text-sm font-bold">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 block">নিও কার্ড বাৎসরিক (৳)</label>
+                                <input type="number" id="editNeoYearly" value="1499" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-teal-500 text-sm font-bold">
+                            </div>
+                            <button onclick="applyPricingEdit()" class="w-full bg-teal-500/20 border border-teal-500/40 text-teal-400 font-bold py-3 rounded-xl hover:bg-teal-500/30 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i> প্রাইস আপডেট করুন
+                            </button>
+                        </div>
+                        <!-- FAQ Edit -->
+                        <div class="glass-card p-8 space-y-4 border-purple-500/10 md:col-span-2">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-9 h-9 bg-purple-500/10 rounded-xl flex items-center justify-center"><i data-lucide="help-circle" class="text-purple-400 w-5 h-5"></i></div>
+                                <h3 class="font-bold">FAQ এডিট</h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 block">প্রশ্ন ১</label>
+                                    <input type="text" id="editFaq1q" value="কার্ডের মেয়াদ কতদিন থাকবে?" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-purple-500 text-sm mb-2">
+                                    <textarea id="editFaq1a" rows="3" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-purple-500 text-sm resize-none">আপনার কার্ডটি অ্যাক্টিভেশনের তারিখ থেকে ১ বছর পর্যন্ত মেয়াদ থাকবে।</textarea>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase tracking-widest mb-1 block">প্রশ্ন ২</label>
+                                    <input type="text" id="editFaq2q" value="কিভাবে ডিসকাউন্ট ব্যবহার করবেন?" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-purple-500 text-sm mb-2">
+                                    <textarea id="editFaq2a" rows="3" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-purple-500 text-sm resize-none">যেকোনো পার্টনার শপে কেনাকাটার সময় কার্ড শো করুন।</textarea>
+                                </div>
+                            </div>
+                            <button onclick="applyFaqEdit()" class="bg-purple-500/20 border border-purple-500/40 text-purple-400 font-bold py-3 px-8 rounded-xl hover:bg-purple-500/30 transition-all flex items-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i> FAQ আপডেট করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TAB: কাস্টমার এডিট ── -->
+                <div id="admintab-editCustomers" class="hidden space-y-4">
+                    <div class="glass-card p-6 space-y-4">
+                        <div class="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
+                            <h3 class="font-bold uppercase tracking-widest text-xs text-gray-400">কাস্টমার ম্যানেজমেন্ট</h3>
+                            <input type="text" id="custSearchInput" placeholder="নাম বা কার্ড ID..." oninput="filterCustomers()" class="bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm w-full md:w-64">
+                        </div>
+                        <div id="customerEditList" class="space-y-2 max-h-96 overflow-y-auto pr-1"></div>
+                    </div>
+                    <!-- Edit Modal -->
+                    <div id="customerEditForm" class="hidden glass-card p-8 space-y-4 border-yellow-400/20">
+                        <h3 class="font-bold text-yellow-400">কাস্টমার এডিট করুন</h3>
+                        <input type="hidden" id="editCustId">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">নাম</label><input type="text" id="editCustName" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm"></div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">ফোন</label><input type="text" id="editCustPhone" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm"></div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">কার্ড টাইপ</label>
+                                <select id="editCustType" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-sm text-gray-300">
+                                    <option>Gold Member</option><option>Premium Member</option><option>Basic</option>
+                                </select>
+                            </div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">মেয়াদ</label><input type="text" id="editCustExpiry" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm"></div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">ডিসকাউন্ট %</label><input type="number" id="editCustDiscount" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-yellow-400 text-sm"></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="saveCustomerEdit()" class="flex-1 btn-premium text-black font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2"><i data-lucide="save" class="w-4 h-4"></i>সেভ করুন</button>
+                            <button onclick="document.getElementById('customerEditForm').classList.add('hidden')" class="flex-1 bg-white/5 border border-white/10 py-3 rounded-xl font-bold text-sm hover:bg-white/10">বাতিল</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TAB: এজেন্ট এডিট ── -->
+                <div id="admintab-editAgents" class="hidden space-y-4">
+                    <div class="glass-card p-6 space-y-4">
+                        <h3 class="font-bold uppercase tracking-widest text-xs text-gray-400">এজেন্ট ম্যানেজমেন্ট</h3>
+                        <div id="agentEditList" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
+                    </div>
+                    <div id="agentEditForm" class="hidden glass-card p-8 space-y-4 border-teal-500/20">
+                        <h3 class="font-bold text-teal-400">এজেন্ট এডিট করুন</h3>
+                        <input type="hidden" id="editAgentId">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">দোকানের নাম</label><input type="text" id="editAgentName" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-teal-500 text-sm"></div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">মালিকের নাম</label><input type="text" id="editAgentOwner" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-teal-500 text-sm"></div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">ফোন</label><input type="text" id="editAgentPhone" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-teal-500 text-sm"></div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">এলাকা</label><input type="text" id="editAgentArea" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-teal-500 text-sm"></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="saveAgentEdit()" class="flex-1 bg-teal-500/20 border border-teal-500/40 text-teal-400 font-bold py-3 rounded-xl hover:bg-teal-500/30 text-sm flex items-center justify-center gap-2"><i data-lucide="save" class="w-4 h-4"></i>সেভ</button>
+                            <button onclick="document.getElementById('agentEditForm').classList.add('hidden')" class="flex-1 bg-white/5 border border-white/10 py-3 rounded-xl font-bold text-sm hover:bg-white/10">বাতিল</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TAB: স্ট্যাটিস্টিক্স ── -->
+                <div id="admintab-adminStats" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-8 space-y-4">
+                            <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400">কার্ড টাইপ ব্রেকডাউন</h3>
+                            <div class="space-y-3">
+                                <div><div class="flex justify-between text-xs mb-1"><span class="text-yellow-400 font-bold">Gold Member</span><span class="text-gray-400">৬৪২ (৫১%)</span></div><div class="h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full" style="width:51%"></div></div></div>
+                                <div><div class="flex justify-between text-xs mb-1"><span class="text-teal-400 font-bold">Premium</span><span class="text-gray-400">৪৩৭ (৩৫%)</span></div><div class="h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-teal-400 rounded-full" style="width:35%"></div></div></div>
+                                <div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400 font-bold">Basic</span><span class="text-gray-400">১৬৮ (১৪%)</span></div><div class="h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-gray-500 rounded-full" style="width:14%"></div></div></div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-8 space-y-4">
+                            <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400">মাসিক আয় (৳)</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl text-sm"><span class="text-gray-300">জানুয়ারি ২০২৬</span><span class="text-yellow-400 font-bold">৳ ৮৪,৫০০</span></div>
+                                <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl text-sm"><span class="text-gray-300">ফেব্রুয়ারি ২০২৬</span><span class="text-yellow-400 font-bold">৳ ৯২,০০০</span></div>
+                                <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl text-sm"><span class="text-gray-300">মার্চ ২০২৬</span><span class="text-emerald-400 font-bold">৳ ১,১২,৩০০ ↑</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-8 space-y-4">
+                        <h3 class="font-bold text-sm uppercase tracking-widest text-gray-400">টপ এজেন্ট</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-4 p-3 bg-white/5 rounded-xl"><span class="text-yellow-400 font-black text-lg w-6">#১</span><div class="w-9 h-9 rounded-xl bg-yellow-400/20 flex items-center justify-center font-black text-yellow-400 text-sm">এ</div><div class="flex-1"><p class="text-sm font-bold">এলিট ফ্যাশন হাউজ</p><p class="text-[10px] text-gray-400">৩৪৮ ট্রানজেকশন</p></div><span class="text-emerald-400 font-bold text-sm">৳ ৮৪,২০০</span></div>
+                            <div class="flex items-center gap-4 p-3 bg-white/5 rounded-xl"><span class="text-gray-400 font-black text-lg w-6">#২</span><div class="w-9 h-9 rounded-xl bg-teal-400/20 flex items-center justify-center font-black text-teal-400 text-sm">ম</div><div class="flex-1"><p class="text-sm font-bold">মেডিপ্লাস ফার্মেসি</p><p class="text-[10px] text-gray-400">২৯১ ট্রানজেকশন</p></div><span class="text-emerald-400 font-bold text-sm">৳ ৬২,৫০০</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TAB: সাব-অ্যাডমিন ম্যানেজ (শুধু Super Admin) ── -->
+                <div id="admintab-manageAdmins" class="hidden space-y-4">
+                    <div class="glass-card p-6 space-y-5 border-red-500/10">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold uppercase tracking-widest text-xs text-gray-400">সাব-অ্যাডমিন লিস্ট</h3>
+                            <span class="text-[10px] text-red-400 font-bold bg-red-500/10 px-3 py-1 rounded-full">Super Admin Only</span>
+                        </div>
+                        <div id="subAdminList" class="space-y-3"></div>
+                    </div>
+                    <!-- Add Sub Admin Form -->
+                    <div class="glass-card p-8 space-y-5 border-orange-500/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-orange-500/10 rounded-xl flex items-center justify-center"><i data-lucide="user-plus" class="text-orange-400 w-5 h-5"></i></div>
+                            <h3 class="font-bold">নতুন সাব-অ্যাডমিন তৈরি করুন</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">নাম</label><input type="text" id="newSubName" placeholder="অ্যাডমিনের নাম" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-orange-500 text-sm"></div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">Username</label><input type="text" id="newSubUser" placeholder="username" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-orange-500 text-sm"></div>
+                            <div><label class="text-[10px] text-gray-400 mb-1 block">Password</label><input type="password" id="newSubPass" placeholder="পাসওয়ার্ড" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-orange-500 text-sm"></div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 mb-2 block uppercase tracking-widest">পারমিশন সেট করুন</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2" id="permissionCheckboxes">
+                                <label class="flex items-center gap-2 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 text-sm"><input type="checkbox" value="allCards" class="perm-check accent-yellow-400"> সব কার্ড দেখা</label>
+                                <label class="flex items-center gap-2 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 text-sm"><input type="checkbox" value="agentApprovals" class="perm-check accent-yellow-400"> এজেন্ট অ্যাপ্রুভাল</label>
+                                <label class="flex items-center gap-2 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 text-sm"><input type="checkbox" value="addCard" class="perm-check accent-yellow-400"> কার্ড যোগ/ব্লক</label>
+                                <label class="flex items-center gap-2 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 text-sm"><input type="checkbox" value="editLanding" class="perm-check accent-yellow-400"> ল্যান্ডিং পেজ এডিট</label>
+                                <label class="flex items-center gap-2 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 text-sm"><input type="checkbox" value="editCustomers" class="perm-check accent-yellow-400"> কাস্টমার এডিট</label>
+                                <label class="flex items-center gap-2 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 text-sm"><input type="checkbox" value="editAgents" class="perm-check accent-yellow-400"> এজেন্ট এডিট</label>
+                                <label class="flex items-center gap-2 p-3 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 text-sm"><input type="checkbox" value="adminStats" class="perm-check accent-yellow-400"> স্ট্যাটিস্টিক্স</label>
+                            </div>
+                        </div>
+                        <button onclick="createSubAdmin()" class="bg-orange-500/20 border border-orange-500/40 text-orange-400 font-bold py-3 px-8 rounded-xl hover:bg-orange-500/30 transition-all flex items-center gap-2">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i> সাব-অ্যাডমিন তৈরি করুন
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script>
+        // ---- QR Library (simple canvas-based QR) ----
+        // Simple QR generator using Google Chart API style — draws placeholder QR
+        function drawQR(canvasId, text) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, size, size);
+            // Draw a representative pattern (real QR needs a library)
+            ctx.fillStyle = '#000';
+            const cellSize = size / 25;
+            // Finder pattern TL
+            for (let r = 0; r < 7; r++) {
+                for (let c = 0; c < 7; c++) {
+                    if (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
+                        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+            // Finder pattern TR
+            for (let r = 0; r < 7; r++) {
+                for (let c = 18; c < 25; c++) {
+                    if (r === 0 || r === 6 || c === 18 || c === 24 || (r >= 2 && r <= 4 && c >= 20 && c <= 22)) {
+                        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+            // Finder pattern BL
+            for (let r = 18; r < 25; r++) {
+                for (let c = 0; c < 7; c++) {
+                    if (r === 18 || r === 24 || c === 0 || c === 6 || (r >= 20 && r <= 22 && c >= 2 && c <= 4)) {
+                        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+            // Data dots
+            const hash = text.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+            for (let r = 8; r < 18; r++) {
+                for (let c = 8; c < 18; c++) {
+                    if ((hash * r * c) % 3 === 0) {
+                        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+            // Timing patterns
+            for (let i = 8; i < 17; i++) {
+                if (i % 2 === 0) {
+                    ctx.fillRect(i * cellSize, 6 * cellSize, cellSize, cellSize);
+                    ctx.fillRect(6 * cellSize, i * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+
+        // ---- Lucide Init ----
+        lucide.createIcons();
+
+        // ---- Nav / Sidebar ----
+        const sidebar = document.getElementById('sidebar');
+        const menuBtn = document.getElementById('menuBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        menuBtn.onclick = () => { sidebar.classList.remove('sidebar-closed'); sidebar.classList.add('sidebar-open'); };
+        closeBtn.onclick = () => { sidebar.classList.remove('sidebar-open'); sidebar.classList.add('sidebar-closed'); };
+
+        // ---- Section Navigation ----
+        function showSection(id) {
+            const target = document.getElementById(id);
+            if (!target) return;
+            document.querySelectorAll('main > section').forEach(sec => {
+                sec.classList.remove('active-section');
+                sec.classList.add('hidden-section');
+            });
+            target.classList.remove('hidden-section');
+            target.classList.add('active-section');
+            sidebar.classList.remove('sidebar-open');
+            sidebar.classList.add('sidebar-closed');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            lucide.createIcons();
+            // Draw QRs when dashboard is shown
+            if (id === 'dashboard') {
+                setTimeout(() => {
+                    drawQR('customerQRCanvas', 'SN-10254');
+                    drawQR('agentQRCanvas', 'AG-55821');
+                    lucide.createIcons();
+                }, 300);
+            }
+        }
+
+        // ---- FAQ ----
+        function toggleFaq(id) {
+            const q = document.getElementById(`fq-${id}`);
+            const i = document.getElementById(`fi-${id}`);
+            const isHidden = q.classList.contains('hidden');
+            document.querySelectorAll("[id^='fq-']").forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll("[id^='fi-']").forEach(el => el.classList.replace('rotate-180', 'rotate-0'));
+            if (isHidden) { q.classList.remove('hidden'); i.classList.add('rotate-180'); }
+        }
+
+        // ---- Location ----
+        function captureLocation() {
+            const btn = document.getElementById('locBtn');
+            const status = document.getElementById('locStatus');
+            if (navigator.geolocation) {
+                status.innerText = "লোকেশন খোঁজা হচ্ছে...";
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    status.innerText = "লোকেশন সেট হয়েছে: " + pos.coords.latitude.toFixed(4) + ", " + pos.coords.longitude.toFixed(4);
+                    btn.style.background = '#10b981';
+                    btn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> লোকেশন সেট করা হয়েছে`;
+                    lucide.createIcons();
+                }, () => { status.innerText = "লোকেশন পারমিশন দিন!"; });
+            }
+        }
+
+        // ---- Copy ----
+        function copyCode(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast('Copied!');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+
+        // ========== ★ NEW: LOGIN TYPE TOGGLE ==========
+        let currentLoginType = 'customer';
+        function setLoginType(type) {
+            currentLoginType = type;
+            const tc = document.getElementById('toggleCustomer');
+            const ta = document.getElementById('toggleAgent');
+            const icon = document.getElementById('loginIcon');
+            const title = document.getElementById('loginTitle');
+            const sub = document.getElementById('loginSub');
+            if (type === 'customer') {
+                tc.classList.add('active'); ta.classList.remove('active'); ta.classList.add('text-gray-400');
+                icon.innerHTML = '<i data-lucide="user" class="text-yellow-400 w-8 h-8"></i>';
+                title.innerText = 'কাস্টমার লগইন';
+                sub.innerText = '৪ সংখ্যার পিন দিয়ে লগইন করুন';
+            } else {
+                ta.classList.add('active'); tc.classList.remove('active'); tc.classList.add('text-gray-400');
+                icon.innerHTML = '<i data-lucide="store" class="text-teal-400 w-8 h-8"></i>';
+                title.innerText = 'এজেন্ট লগইন';
+                sub.innerText = 'এজেন্ট পিন দিয়ে দোকান প্যানেল খুলুন';
+            }
+            lucide.createIcons();
+        }
+
+        // ---- Mock Login ----
+        function mockLogin() {
+            document.getElementById('loginView').classList.add('hidden');
+            if (currentLoginType === 'customer') {
+                document.getElementById('customerDashboard').classList.remove('hidden');
+                document.getElementById('agentDashboard').classList.add('hidden');
+                setTimeout(() => { drawQR('customerQRCanvas', 'SN-10254'); lucide.createIcons(); }, 200);
+            } else {
+                document.getElementById('agentDashboard').classList.remove('hidden');
+                document.getElementById('customerDashboard').classList.add('hidden');
+                setTimeout(() => { drawQR('agentQRCanvas', 'AG-55821'); lucide.createIcons(); }, 200);
+            }
+        }
+
+        function logoutDashboard() {
+            document.getElementById('loginView').classList.remove('hidden');
+            document.getElementById('customerDashboard').classList.add('hidden');
+            document.getElementById('agentDashboard').classList.add('hidden');
+            document.getElementById('loginPin').value = '';
+        }
+
+        // ========== ★ NEW: CUSTOMER DASHBOARD TABS ==========
+        function showDashTab(tabId) {
+            const tabs = ['myCard', 'scanQR', 'history'];
+            tabs.forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if (el) el.classList.add('hidden');
+                document.querySelectorAll(`[data-tab="${t}"]`).forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-gray-400');
+                });
+            });
+            const active = document.getElementById('tab-' + tabId);
+            if (active) active.classList.remove('hidden');
+            document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(btn => {
+                btn.classList.add('active');
+                btn.classList.remove('text-gray-400');
+            });
+            lucide.createIcons();
+        }
+
+        // ========== ★ NEW: AGENT DASHBOARD TABS ==========
+        function showAgentTab(tabId) {
+            const tabs = ['verifyCard', 'applyDiscount', 'agentQR', 'agentHistory'];
+            tabs.forEach(t => {
+                const el = document.getElementById('agtab-' + t);
+                if (el) el.classList.add('hidden');
+                document.querySelectorAll(`[data-agtab="${t}"]`).forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-gray-400');
+                });
+            });
+            const active = document.getElementById('agtab-' + tabId);
+            if (active) active.classList.remove('hidden');
+            document.querySelectorAll(`[data-agtab="${tabId}"]`).forEach(btn => {
+                btn.classList.add('active');
+                btn.classList.remove('text-gray-400');
+            });
+            lucide.createIcons();
+        }
+
+        // ========== ★ NEW: QR SCANNERS ==========
+        let customerScanner = null;
+        let agentScanner = null;
+
+        function startCustomerScanner() {
+            if (customerScanner) return;
+            customerScanner = new Html5Qrcode("qr-reader-customer");
+            customerScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 200, height: 200 } },
+                (decodedText) => {
+                    const result = document.getElementById('customerScanResult');
+                    result.classList.remove('hidden');
+                    result.innerText = "✅ স্ক্যান সফল: " + decodedText;
+                    stopCustomerScanner();
+                },
+                () => {}
+            ).catch(() => {
+                showToast('ক্যামেরা পারমিশন দিন!');
+            });
+        }
+
+        function stopCustomerScanner() {
+            if (customerScanner) {
+                customerScanner.stop().then(() => { customerScanner.clear(); customerScanner = null; }).catch(() => {});
+            }
+        }
+
+        function startAgentScanner() {
+            if (agentScanner) return;
+            agentScanner = new Html5Qrcode("qr-reader-agent");
+            agentScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 220, height: 220 } },
+                (decodedText) => {
+                    stopAgentScanner();
+                    verifyCard(decodedText.trim().toUpperCase());
+                },
+                () => {}
+            ).catch(() => {
+                showToast('ক্যামেরা পারমিশন দিন!');
+            });
+        }
+
+        function stopAgentScanner() {
+            if (agentScanner) {
+                agentScanner.stop().then(() => { agentScanner.clear(); agentScanner = null; }).catch(() => {});
+            }
+        }
+
+        // ========== CARD VERIFICATION — ENHANCED ==========
+        const mockCards = {
+            'SN-10254': { name: 'রবিন আহমেদ', phone: '017••••1234', type: 'Gold Member', cardColor: '#D4AF37', initials: 'রআ', expires: '12 Dec 2026', active: true, discount: 15, totalSaved: '৳ ৩,৪৫০', joined: 'Jan 2025' },
+            'SN-20834': { name: 'তানিয়া রহমান', phone: '019••••5678', type: 'Premium Member', cardColor: '#14B8A6', initials: 'তর', expires: '01 Aug 2026', active: true, discount: 10, totalSaved: '৳ ১,৮৭০', joined: 'Mar 2025' },
+            'SN-99999': { name: 'পুরানো ইউজার', phone: '018••••9999', type: 'Basic', cardColor: '#6b7280', initials: 'পই', expires: '01 Jan 2025', active: false, discount: 5, totalSaved: '৳ ৫৬০', joined: 'Oct 2024' },
+        };
+
+        let currentVerifiedCard = null;
+
+        // ★ Lock system
+        let failedAttempts = 0;
+        let lockTimer = null;
+        let isLocked = false;
+        let lockCountdown = 0;
+
+        function verifyCardManual() {
+            const id = document.getElementById('manualCardId').value.trim().toUpperCase();
+            if (!id) { showToast('Card ID লিখুন!'); return; }
+            if (isLocked) { showToast(`🔒 ${lockCountdown} সেকেন্ড অপেক্ষা করুন!`); return; }
+            verifyCard(id);
+        }
+
+        // ★ SMS-style notification
+        function showSmsAlert(text, isSuccess = true) {
+            const el = document.getElementById('smsAlert');
+            const textEl = document.getElementById('smsAlertText');
+            const timeEl = document.getElementById('smsAlertTime');
+            const icon = el.querySelector('[data-lucide="bell"]').parentElement;
+            const card = el.querySelector('.glass-card');
+
+            textEl.innerText = text;
+            const now = new Date();
+            timeEl.innerText = now.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }) + ' — এইমাত্র';
+
+            if (isSuccess) {
+                card.style.borderColor = 'rgba(16,185,129,0.4)';
+                card.style.background = 'rgba(16,185,129,0.08)';
+                icon.style.background = 'rgba(16,185,129,0.2)';
+                el.querySelector('[data-lucide="bell"]').style.color = '#34d399';
+            } else {
+                card.style.borderColor = 'rgba(239,68,68,0.4)';
+                card.style.background = 'rgba(239,68,68,0.08)';
+                icon.style.background = 'rgba(239,68,68,0.2)';
+                el.querySelector('[data-lucide="bell"]').style.color = '#f87171';
+            }
+
+            el.classList.remove('hidden');
+            el.style.animation = 'none';
+            setTimeout(() => { el.style.animation = 'slideDown 0.4s ease'; }, 10);
+            lucide.createIcons();
+            clearTimeout(window._smsTimeout);
+            window._smsTimeout = setTimeout(() => el.classList.add('hidden'), 5000);
+        }
+
+        // ★ Lock function
+        function triggerLock() {
+            isLocked = true;
+            lockCountdown = 30;
+            const manualInput = document.getElementById('manualCardId');
+            const verifyBtn = manualInput.nextElementSibling;
+            manualInput.classList.add('lock-shake');
+            setTimeout(() => manualInput.classList.remove('lock-shake'), 600);
+
+            const result = document.getElementById('verifyResult');
+            result.classList.remove('hidden', 'verify-valid', 'verify-invalid');
+            result.classList.add('lock-overlay');
+            document.getElementById('verifyStatus').innerHTML = `🔒 <span class="text-red-400">৩ বার ভুল হয়েছে! লক হয়েছে।</span>`;
+            document.getElementById('verifyDetails').innerHTML = `
+                <div class="text-center space-y-2">
+                    <div id="lockCountdownDisp" class="text-4xl font-black text-red-400">30</div>
+                    <p class="text-xs text-gray-400">সেকেন্ড পর আবার চেষ্টা করুন</p>
+                </div>`;
+            document.getElementById('applyDiscountBtn').classList.add('hidden');
+
+            lockTimer = setInterval(() => {
+                lockCountdown--;
+                const disp = document.getElementById('lockCountdownDisp');
+                if (disp) disp.innerText = lockCountdown;
+                if (lockCountdown <= 0) {
+                    clearInterval(lockTimer);
+                    isLocked = false;
+                    failedAttempts = 0;
+                    result.classList.add('hidden');
+                    result.classList.remove('lock-overlay');
+                    showToast('🔓 লক খুলে গেছে! আবার চেষ্টা করুন।');
+                }
+            }, 1000);
+        }
+
+        function verifyCard(cardId) {
+            const result = document.getElementById('verifyResult');
+            const status = document.getElementById('verifyStatus');
+            const details = document.getElementById('verifyDetails');
+            const btn = document.getElementById('applyDiscountBtn');
+            result.classList.remove('hidden', 'verify-valid', 'verify-invalid', 'lock-overlay');
+
+            const card = mockCards[cardId];
+
+            if (card && card.active) {
+                // ★ Success: reset failed attempts
+                failedAttempts = 0;
+                result.classList.add('verify-valid', 'verify-anim');
+                setTimeout(() => result.classList.remove('verify-anim'), 600);
+
+                status.innerHTML = `✅ <span class="text-emerald-400 text-xl">কার্ড সক্রিয় ও বৈধ!</span>`;
+
+                // ★ Profile card with avatar
+                details.innerHTML = `
+                    <div class="flex items-center gap-4 p-3 bg-white/5 rounded-xl mb-3">
+                        <div class="w-14 h-14 rounded-2xl profile-avatar flex items-center justify-center text-black font-black text-xl flex-shrink-0">${card.initials}</div>
+                        <div>
+                            <p class="font-black text-white text-base">${card.name}</p>
+                            <p class="text-xs text-gray-400">${card.phone}</p>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 inline-block" style="background:${card.cardColor}22;color:${card.cardColor}">${card.type}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="p-2 bg-white/5 rounded-lg"><p class="text-[10px] text-gray-400">কার্ড ID</p><p class="font-bold text-white text-sm">${cardId}</p></div>
+                        <div class="p-2 bg-white/5 rounded-lg"><p class="text-[10px] text-gray-400">মেয়াদ</p><p class="font-bold text-emerald-400 text-sm">${card.expires}</p></div>
+                        <div class="p-2 bg-white/5 rounded-lg"><p class="text-[10px] text-gray-400">ডিসকাউন্ট</p><p class="font-bold text-yellow-400 text-sm">${card.discount}%</p></div>
+                        <div class="p-2 bg-white/5 rounded-lg"><p class="text-[10px] text-gray-400">মোট সাশ্রয়</p><p class="font-bold text-teal-400 text-sm">${card.totalSaved}</p></div>
+                    </div>`;
+
+                currentVerifiedCard = { id: cardId, ...card };
+                btn.classList.remove('hidden');
+                document.getElementById('discountCardInfo').innerText = `কার্ড: ${cardId} — ${card.type}`;
+
+                // ★ SMS notification
+                showSmsAlert(`✅ ${card.name} এর কার্ড ভেরিফাই হয়েছে! ${card.discount}% ডিসকাউন্ট প্রযোজ্য।`, true);
+
+            } else if (card && !card.active) {
+                // ★ Expired card
+                failedAttempts++;
+                result.classList.add('verify-invalid', 'expired-pulse');
+                setTimeout(() => result.classList.remove('expired-pulse'), 4000);
+
+                status.innerHTML = `❌ <span class="text-red-400 text-xl">কার্ডের মেয়াদ শেষ!</span>`;
+                details.innerHTML = `
+                    <div class="flex items-center gap-4 p-3 bg-red-500/5 rounded-xl mb-3 border border-red-500/20">
+                        <div class="w-14 h-14 rounded-2xl bg-gray-600 flex items-center justify-center text-white font-black text-xl flex-shrink-0 opacity-50">${card.initials}</div>
+                        <div>
+                            <p class="font-black text-white text-base opacity-70">${card.name}</p>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 inline-block bg-red-500/20 text-red-400">Expired — ${card.expires}</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center">
+                        <p class="text-xs text-red-300 font-bold">এই কার্ডটি মেয়াদোত্তীর্ণ।</p>
+                        <button onclick="showSection('buy')" class="mt-2 text-[10px] bg-red-500/20 border border-red-500/30 text-red-400 px-4 py-1.5 rounded-full font-bold hover:bg-red-500/30 transition-all">কার্ড রিনিউ করুন →</button>
+                    </div>`;
+                btn.classList.add('hidden');
+                currentVerifiedCard = null;
+
+                // ★ SMS notification — expired
+                showSmsAlert(`⚠️ ${card.name} এর কার্ড (${cardId}) মেয়াদোত্তীর্ণ! রিনিউ করা প্রয়োজন।`, false);
+
+            } else {
+                // ★ Not found — increment fail counter
+                failedAttempts++;
+                if (failedAttempts >= 3) { triggerLock(); return; }
+
+                const remaining = 3 - failedAttempts;
+                result.classList.add('verify-invalid');
+                const manualInput = document.getElementById('manualCardId');
+                manualInput.classList.add('lock-shake');
+                setTimeout(() => manualInput.classList.remove('lock-shake'), 600);
+
+                status.innerHTML = `❌ <span class="text-red-400 text-xl">কার্ড পাওয়া যায়নি!</span>`;
+                details.innerHTML = `
+                    <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center space-y-1">
+                        <p class="text-sm text-red-300 font-bold">এই Card ID সিস্টেমে নেই।</p>
+                        <p class="text-[10px] text-gray-400">সঠিক কার্ড ID যাচাই করুন। আরো <span class="text-red-400 font-bold">${remaining} বার</span> ভুল হলে লক হবে।</p>
+                    </div>`;
+                btn.classList.add('hidden');
+                currentVerifiedCard = null;
+
+                showSmsAlert(`❌ অজানা Card ID (${cardId}) — আর ${remaining} বার ভুল হলে লক হবে!`, false);
+            }
+            lucide.createIcons();
+        }
+
+        function goToDiscount() {
+            showAgentTab('applyDiscount');
+            if (currentVerifiedCard) {
+                selectRate(currentVerifiedCard.discount);
+            }
+        }
+
+        // ========== ★ NEW: DISCOUNT CALCULATOR ==========
+        let selectedRate = 0;
+
+        function selectRate(rate) {
+            selectedRate = rate;
+            document.querySelectorAll('.rate-btn').forEach(btn => {
+                btn.classList.remove('border-yellow-400', 'bg-yellow-400/20', 'text-yellow-400');
+                btn.classList.add('border-white/10', 'bg-white/5');
+                if (btn.innerText === rate + '%') {
+                    btn.classList.add('border-yellow-400', 'bg-yellow-400/20', 'text-yellow-400');
+                    btn.classList.remove('border-white/10', 'bg-white/5');
+                }
+            });
+            calculateDiscount();
+        }
+
+        function calculateDiscount() {
+            const bill = parseFloat(document.getElementById('totalBillInput').value) || 0;
+            if (bill <= 0 || selectedRate <= 0) { document.getElementById('discountResult').classList.add('hidden'); return; }
+            const disc = Math.round(bill * selectedRate / 100);
+            const final = bill - disc;
+            document.getElementById('origBill').innerText = '৳ ' + bill.toLocaleString('bn');
+            document.getElementById('discAmount').innerText = '-৳ ' + disc.toLocaleString('bn');
+            document.getElementById('finalBill').innerText = '৳ ' + final.toLocaleString('bn');
+            document.getElementById('discountResult').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function confirmDiscount() {
+            showToast('✅ ডিসকাউন্ট কনফার্ম হয়েছে!');
+            document.getElementById('totalBillInput').value = '';
+            document.getElementById('discountResult').classList.add('hidden');
+            selectedRate = 0;
+            document.querySelectorAll('.rate-btn').forEach(btn => {
+                btn.classList.remove('border-yellow-400', 'bg-yellow-400/20', 'text-yellow-400');
+                btn.classList.add('border-white/10', 'bg-white/5');
+            });
+        }
+
+        // ========== ★ NEW: AGENT QR DOWNLOAD ==========
+        function downloadAgentQR() {
+            const canvas = document.getElementById('agentQRCanvas');
+            const link = document.createElement('a');
+            link.download = 'agent-qr-AG-55821.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // ========== ★ NEW: SHOP IMAGE UPLOAD ==========
+        function handleShopImages(event) {
+            const files = Array.from(event.target.files).slice(0, 3);
+            const grid = document.getElementById('imagePreviewGrid');
+            const placeholder = document.getElementById('uploadPlaceholder');
+            grid.innerHTML = '';
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'relative aspect-square rounded-xl overflow-hidden bg-white/5';
+                    div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-xl">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>`;
+                    grid.appendChild(div);
+                    lucide.createIcons();
+                };
+                reader.readAsDataURL(file);
+            });
+            placeholder.classList.add('hidden');
+            grid.classList.remove('hidden');
+            grid.classList.add('grid');
+        }
+
+        // ========== ADMIN SYSTEM — ROLE BASED ==========
+
+        const ADMIN_KEY = 'savelo-admin-2026';
+
+        // ── Admin user database ──
+        // role: 'super' = আপনি, 'sub' = সাব-অ্যাডমিন
+        // permissions: যে ট্যাবগুলো দেখতে পাবে
+        let adminUsers = [
+            { id: 'SUPER-001', username: 'superadmin', password: 'SN@admin#2026', name: 'Super Admin', role: 'super',
+              permissions: ['allCards','agentApprovals','addCard','editLanding','editCustomers','editAgents','adminStats','manageAdmins'] },
+        ];
+
+        // All possible tabs config
+        const ALL_TABS = [
+            { id: 'allCards',       icon: 'credit-card',   label: 'সব কার্ড' },
+            { id: 'agentApprovals', icon: 'user-check',    label: 'এজেন্ট অ্যাপ্রুভাল' },
+            { id: 'addCard',        icon: 'plus-circle',   label: 'কার্ড যোগ/ব্লক' },
+            { id: 'editLanding',    icon: 'layout',        label: 'ল্যান্ডিং পেজ এডিট' },
+            { id: 'editCustomers',  icon: 'users',         label: 'কাস্টমার এডিট' },
+            { id: 'editAgents',     icon: 'store',         label: 'এজেন্ট এডিট' },
+            { id: 'adminStats',     icon: 'bar-chart-2',   label: 'স্ট্যাটিস্টিক্স' },
+            { id: 'manageAdmins',   icon: 'shield',        label: 'অ্যাডমিন ম্যানেজ' },
+        ];
+
+        let currentAdminUser = null;
+
+        // URL check
+        function checkAdminURL() {
+            const params = new URLSearchParams(window.location.search);
+            const key = params.get('key');
+            if (key === ADMIN_KEY) {
+                document.querySelectorAll('main > section').forEach(sec => {
+                    sec.classList.remove('active-section');
+                    sec.classList.add('hidden-section');
+                });
+                document.getElementById('admin').classList.remove('hidden-section');
+                document.getElementById('admin').classList.add('active-section');
+                lucide.createIcons();
+            }
+        }
+
+        function adminLogin() {
+            const user = document.getElementById('adminEmailInput').value.trim();
+            const pass = document.getElementById('adminPassInput').value;
+            const errEl = document.getElementById('adminLoginError');
+            const found = adminUsers.find(a => a.username === user && a.password === pass);
+            if (found) {
+                currentAdminUser = found;
+                document.getElementById('adminLoginView').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                errEl.classList.add('hidden');
+                setupAdminUI();
+                renderAdminData();
+                lucide.createIcons();
+            } else {
+                errEl.classList.remove('hidden');
+                document.getElementById('adminPassInput').value = '';
+                document.getElementById('adminPassInput').classList.add('lock-shake');
+                setTimeout(() => document.getElementById('adminPassInput').classList.remove('lock-shake'), 600);
+            }
+        }
+
+        function setupAdminUI() {
+            const u = currentAdminUser;
+            // Role badge & header
+            const isSuperAdmin = u.role === 'super';
+            document.getElementById('adminWelcomeName').innerText = u.name;
+            document.getElementById('adminWelcomeName').className = 'text-xl font-black ' + (isSuperAdmin ? 'text-red-400' : 'text-orange-400');
+            document.getElementById('adminRoleBadge').innerText = isSuperAdmin ? '👑 Super Admin' : '🛡️ Sub Admin';
+            document.getElementById('adminRoleBadge').className = 'text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ' + (isSuperAdmin ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400');
+            document.getElementById('adminRoleDesc').innerText = isSuperAdmin ? 'সম্পূর্ণ অ্যাক্সেস — সব কিছু নিয়ন্ত্রণ করুন' : 'সীমিত অ্যাক্সেস — নির্ধারিত ফাংশন';
+            document.getElementById('adminRoleIcon').className = 'w-12 h-12 rounded-2xl flex items-center justify-center ' + (isSuperAdmin ? 'bg-red-500/20' : 'bg-orange-500/20');
+            document.getElementById('adminRoleIcon').innerHTML = `<i data-lucide="${isSuperAdmin ? 'crown' : 'shield'}" class="${isSuperAdmin ? 'text-red-400' : 'text-orange-400'} w-6 h-6"></i>`;
+
+            // Build tab bar based on permissions
+            const tabBar = document.getElementById('adminTabBar');
+            tabBar.innerHTML = '';
+            ALL_TABS.forEach((tab, i) => {
+                if (!u.permissions.includes(tab.id)) return;
+                const btn = document.createElement('button');
+                btn.className = `dash-tab ${i === 0 || (tab.id === u.permissions[0]) ? '' : 'text-gray-400'} text-xs font-bold px-4 py-3 rounded-xl whitespace-nowrap flex items-center gap-2`;
+                btn.setAttribute('data-admintab', tab.id);
+                btn.setAttribute('onclick', `showAdminTab('${tab.id}')`);
+                btn.innerHTML = `<i data-lucide="${tab.icon}" class="w-4 h-4"></i> ${tab.label}`;
+                tabBar.appendChild(btn);
+            });
+
+            // Show first permitted tab
+            if (u.permissions.length > 0) {
+                showAdminTab(u.permissions[0]);
+            }
+            lucide.createIcons();
+        }
+
+        function adminLogout() {
+            currentAdminUser = null;
+            document.getElementById('adminLoginView').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('adminEmailInput').value = '';
+            document.getElementById('adminPassInput').value = '';
+            document.getElementById('adminLoginError').classList.add('hidden');
+        }
+
+        // Tab switcher
+        function showAdminTab(tabId) {
+            ALL_TABS.forEach(t => {
+                const el = document.getElementById('admintab-' + t.id);
+                if (el) el.classList.add('hidden');
+                document.querySelectorAll(`[data-admintab="${t.id}"]`).forEach(btn => {
+                    btn.classList.remove('active'); btn.classList.add('text-gray-400');
+                });
+            });
+            const active = document.getElementById('admintab-' + tabId);
+            if (active) active.classList.remove('hidden');
+            document.querySelectorAll(`[data-admintab="${tabId}"]`).forEach(btn => {
+                btn.classList.add('active'); btn.classList.remove('text-gray-400');
+            });
+            if (tabId === 'editCustomers') renderCustomerEditList();
+            if (tabId === 'editAgents') renderAgentEditList();
+            if (tabId === 'manageAdmins') renderSubAdminList();
+            lucide.createIcons();
+        }
+
+        // ── Mock data ──
+        let adminCards = [
+            { id: 'SN-10254', name: 'রবিন আহমেদ',  phone: '01711234567', type: 'Gold Member',    expires: '12 Dec 2026', status: 'active',  discount: 15 },
+            { id: 'SN-20834', name: 'তানিয়া রহমান', phone: '01912345678', type: 'Premium Member', expires: '01 Aug 2026', status: 'active',  discount: 10 },
+            { id: 'SN-99999', name: 'পুরানো ইউজার', phone: '01812349999', type: 'Basic',          expires: '01 Jan 2025', status: 'expired', discount: 5  },
+            { id: 'SN-30512', name: 'শাওন খান',     phone: '01612340000', type: 'Gold Member',    expires: '15 Nov 2026', status: 'blocked', discount: 15 },
+        ];
+        let pendingAgents = [
+            { id: 'AG-P001', name: 'সিটি ফার্মেসি',   owner: 'করিম সাহেব', phone: '01711110001', area: 'ঢাকা',     fee: '৫,০০০', status: 'pending' },
+            { id: 'AG-P002', name: 'নিউ লুক ফ্যাশন', owner: 'রহিম ভাই',   phone: '01911110002', area: 'গাইবান্ধা', fee: '৫,০০০', status: 'pending' },
+        ];
+        let approvedAgents = [
+            { id: 'AG-55821', name: 'এলিট ফ্যাশন হাউজ',  owner: 'আলী সাহেব',    phone: '01611110003', area: 'গাইবান্ধা', status: 'active' },
+            { id: 'AG-44210', name: 'মেডিপ্লাস ফার্মেসি', owner: 'ডাক্তার জামাল', phone: '01811110004', area: 'রংপুর',     status: 'active' },
+        ];
+
+        function renderAdminData() { renderCardList(adminCards); renderAgentApprovals(); }
+
+        // Card list
+        function renderCardList(cards) {
+            const c = document.getElementById('cardListTable');
+            if (!c) return;
+            c.innerHTML = cards.length === 0 ? `<p class="text-xs text-gray-500 text-center py-6">কোনো ফলাফল নেই।</p>` :
+            cards.map(card => {
+                const sc = card.status==='active'?'emerald':card.status==='expired'?'red':'gray';
+                const sl = card.status==='active'?'Active':card.status==='expired'?'Expired':'Blocked';
+                return `<div class="flex items-center gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
+                    <div class="w-9 h-9 rounded-xl bg-yellow-400/10 flex items-center justify-center font-black text-yellow-400 text-sm flex-shrink-0">${card.name.charAt(0)}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <p class="text-sm font-bold">${card.name}</p>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-${sc}-500/20 text-${sc}-400 font-bold">${sl}</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400">${card.id} • ${card.type} • ${card.discount}% • ${card.expires}</p>
+                    </div>
+                    <button onclick="quickBlockToggle('${card.id}')" class="text-[10px] px-3 py-1.5 rounded-lg border ${card.status==='blocked'?'border-emerald-500/40 text-emerald-400 bg-emerald-500/10':'border-red-500/30 text-red-400 bg-red-500/10'} font-bold hover:opacity-80">
+                        ${card.status==='blocked'?'আনব্লক':'ব্লক'}
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        function filterCards() {
+            const q = (document.getElementById('cardSearchInput')?.value||'').toLowerCase();
+            const s = document.getElementById('cardStatusFilter')?.value||'all';
+            renderCardList(adminCards.filter(c => (c.name.toLowerCase().includes(q)||c.id.toLowerCase().includes(q)) && (s==='all'||c.status===s)));
+        }
+
+        function quickBlockToggle(id) {
+            const c = adminCards.find(x=>x.id===id); if(!c) return;
+            c.status = c.status==='blocked'?'active':'blocked';
+            if(mockCards[id]) mockCards[id].active = c.status==='active';
+            showToast(c.status==='active'?`✅ ${c.name} — আনব্লক`:`🚫 ${c.name} — ব্লক`);
+            filterCards();
+        }
+
+        // Agent approvals
+        function renderAgentApprovals() {
+            const p = document.getElementById('agentApprovalList');
+            const a = document.getElementById('approvedAgentList');
+            if (p) p.innerHTML = pendingAgents.length===0
+                ? `<p class="text-xs text-gray-500 text-center py-4">কোনো পেন্ডিং নেই।</p>`
+                : pendingAgents.map(ag=>`
+                <div class="flex items-center gap-3 p-4 bg-yellow-400/5 border border-yellow-400/10 rounded-xl">
+                    <div class="w-9 h-9 rounded-xl bg-yellow-400/10 flex items-center justify-center font-black text-yellow-400 text-sm">${ag.name.charAt(0)}</div>
+                    <div class="flex-1"><p class="text-sm font-bold">${ag.name}</p><p class="text-[10px] text-gray-400">${ag.owner} • ${ag.phone} • ${ag.area}</p></div>
+                    <div class="flex gap-2">
+                        <button onclick="approveAgent('${ag.id}')" class="text-[10px] px-3 py-1.5 rounded-lg border border-emerald-500/40 text-emerald-400 bg-emerald-500/10 font-bold">অ্যাপ্রুভ</button>
+                        <button onclick="rejectAgent('${ag.id}')"  class="text-[10px] px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 bg-red-500/10 font-bold">রিজেক্ট</button>
+                    </div>
+                </div>`).join('');
+            if (a) a.innerHTML = approvedAgents.map(ag=>`
+                <div class="flex items-center gap-3 p-4 bg-white/5 rounded-xl">
+                    <div class="w-9 h-9 rounded-xl bg-teal-400/10 flex items-center justify-center font-black text-teal-400 text-sm">${ag.name.charAt(0)}</div>
+                    <div class="flex-1"><p class="text-sm font-bold">${ag.name}</p><p class="text-[10px] text-gray-400">${ag.id} • ${ag.owner} • ${ag.area}</p></div>
+                    <span class="text-[10px] px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">Active ✓</span>
+                </div>`).join('');
+        }
+
+        function approveAgent(id) {
+            const i=pendingAgents.findIndex(a=>a.id===id); if(i<0) return;
+            const ag=pendingAgents.splice(i,1)[0]; ag.status='active'; approvedAgents.unshift(ag);
+            renderAgentApprovals(); showToast('✅ '+ag.name+' অ্যাপ্রুভ!');
+        }
+        function rejectAgent(id) {
+            const i=pendingAgents.findIndex(a=>a.id===id); if(i<0) return;
+            const ag=pendingAgents.splice(i,1)[0]; renderAgentApprovals(); showToast('🚫 '+ag.name+' রিজেক্ট।');
+        }
+
+        // Add card
+        function adminAddCard() {
+            const id=document.getElementById('newCardId').value.trim().toUpperCase();
+            const name=document.getElementById('newCardName').value.trim();
+            const phone=document.getElementById('newCardPhone').value.trim();
+            const type=document.getElementById('newCardType').value;
+            const expires=document.getElementById('newCardExpiry').value.trim();
+            const discount=parseInt(document.getElementById('newCardDiscount').value)||10;
+            if(!id||!name||!phone||!expires){showToast('⚠️ সব তথ্য পূরণ করুন!');return;}
+            if(adminCards.find(c=>c.id===id)){showToast('⚠️ Card ID আগেই আছে!');return;}
+            adminCards.unshift({id,name,phone,type,expires,status:'active',discount});
+            mockCards[id]={name,phone:phone.slice(0,5)+'••••'+phone.slice(-2),type,cardColor:'#D4AF37',initials:name.slice(0,2),expires,active:true,discount,totalSaved:'৳ ০',joined:'নতুন'};
+            ['newCardId','newCardName','newCardPhone','newCardExpiry','newCardDiscount'].forEach(f=>document.getElementById(f).value='');
+            filterCards(); showAdminTab('allCards'); showToast('✅ কার্ড যোগ: '+id);
+        }
+
+        function adminFindCard() {
+            const id=document.getElementById('blockCardId').value.trim().toUpperCase();
+            const card=adminCards.find(c=>c.id===id);
+            const p=document.getElementById('blockCardPreview');
+            p.classList.remove('hidden');
+            p.innerHTML=card
+                ?`<p class="font-bold text-white">${card.name} <span class="text-[10px] text-gray-400">${card.id}</span></p><p class="text-[10px] text-gray-400">${card.type} • ${card.expires}</p><p class="text-[10px] font-bold mt-1 ${card.status==='active'?'text-emerald-400':card.status==='blocked'?'text-red-400':'text-gray-400'}">${card.status==='active'?'Active ✓':card.status==='blocked'?'Blocked 🚫':'Expired'}</p>`
+                :`<p class="text-red-400 text-xs font-bold">কার্ড পাওয়া যায়নি।</p>`;
+        }
+        function adminBlockCard() {
+            const id=document.getElementById('blockCardId').value.trim().toUpperCase();
+            const c=adminCards.find(x=>x.id===id); if(!c){showToast('⚠️ আগে খুঁজুন!');return;}
+            c.status='blocked'; if(mockCards[id])mockCards[id].active=false;
+            adminFindCard(); filterCards(); showToast('🚫 '+c.name+' ব্লক!');
+        }
+        function adminUnblockCard() {
+            const id=document.getElementById('blockCardId').value.trim().toUpperCase();
+            const c=adminCards.find(x=>x.id===id); if(!c){showToast('⚠️ আগে খুঁজুন!');return;}
+            c.status='active'; if(mockCards[id])mockCards[id].active=true;
+            adminFindCard(); filterCards(); showToast('✅ '+c.name+' আনব্লক!');
+        }
+
+        // ── Landing page edit ──
+        function applyHeroEdit() {
+            const h1=document.getElementById('editHero1').value;
+            const h2=document.getElementById('editHero2').value;
+            const sub=document.getElementById('editSubtitle').value;
+            const heroEl=document.querySelector('#home h1');
+            if(heroEl) heroEl.innerHTML=`${h1} <br> <span class="gold-text italic">${h2}</span>`;
+            const subEl=document.querySelector('#home p.text-gray-400');
+            if(subEl) subEl.innerText=sub;
+            showToast('✅ Hero সেকশন লাইভ আপডেট হয়েছে!');
+        }
+        function applyPricingEdit() {
+            const dp=document.getElementById('editDiscountPrice').value;
+            const nm=document.getElementById('editNeoMonthly').value;
+            const ny=document.getElementById('editNeoYearly').value;
+            document.querySelectorAll('#home .text-5xl').forEach(el=>{ if(el.innerText.includes('৪৯৯')) el.innerText='৳ '+dp; });
+            showToast('✅ প্রাইসিং আপডেট হয়েছে! (লাইভ ব্যাকএন্ডে সেভ হবে)');
+        }
+        function applyFaqEdit() {
+            const q1=document.getElementById('editFaq1q').value;
+            const a1=document.getElementById('editFaq1a').value;
+            const q2=document.getElementById('editFaq2q').value;
+            const a2=document.getElementById('editFaq2a').value;
+            const fqBtns=document.querySelectorAll("[id^='fi-']");
+            if(fqBtns[0]) fqBtns[0].closest('button').querySelector('span').innerText=q1;
+            if(document.getElementById('fq-1')) document.getElementById('fq-1').innerText=a1;
+            if(fqBtns[1]) fqBtns[1].closest('button').querySelector('span').innerText=q2;
+            if(document.getElementById('fq-2')) document.getElementById('fq-2').innerText=a2;
+            showToast('✅ FAQ আপডেট হয়েছে!');
+        }
+
+        // ── Customer edit ──
+        function renderCustomerEditList() {
+            const c=document.getElementById('customerEditList'); if(!c) return;
+            c.innerHTML=adminCards.map(card=>`
+                <div class="flex items-center gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
+                    <div class="w-9 h-9 rounded-xl bg-yellow-400/10 flex items-center justify-center font-black text-yellow-400 text-sm">${card.name.charAt(0)}</div>
+                    <div class="flex-1"><p class="text-sm font-bold">${card.name}</p><p class="text-[10px] text-gray-400">${card.id} • ${card.type} • ${card.expires}</p></div>
+                    <button onclick="openCustomerEdit('${card.id}')" class="text-[10px] px-3 py-1.5 rounded-lg border border-yellow-400/30 text-yellow-400 bg-yellow-400/10 font-bold hover:bg-yellow-400/20 flex items-center gap-1">
+                        <i data-lucide="edit-2" class="w-3 h-3"></i> এডিট
+                    </button>
+                </div>`).join('');
+            lucide.createIcons();
+        }
+        function filterCustomers() {
+            const q=(document.getElementById('custSearchInput')?.value||'').toLowerCase();
+            const c=document.getElementById('customerEditList'); if(!c) return;
+            const filtered=adminCards.filter(x=>x.name.toLowerCase().includes(q)||x.id.toLowerCase().includes(q));
+            c.innerHTML=filtered.map(card=>`
+                <div class="flex items-center gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
+                    <div class="w-9 h-9 rounded-xl bg-yellow-400/10 flex items-center justify-center font-black text-yellow-400 text-sm">${card.name.charAt(0)}</div>
+                    <div class="flex-1"><p class="text-sm font-bold">${card.name}</p><p class="text-[10px] text-gray-400">${card.id} • ${card.type} • ${card.expires}</p></div>
+                    <button onclick="openCustomerEdit('${card.id}')" class="text-[10px] px-3 py-1.5 rounded-lg border border-yellow-400/30 text-yellow-400 bg-yellow-400/10 font-bold hover:bg-yellow-400/20">এডিট</button>
+                </div>`).join('');
+        }
+        function openCustomerEdit(id) {
+            const c=adminCards.find(x=>x.id===id); if(!c) return;
+            document.getElementById('editCustId').value=c.id;
+            document.getElementById('editCustName').value=c.name;
+            document.getElementById('editCustPhone').value=c.phone;
+            document.getElementById('editCustType').value=c.type;
+            document.getElementById('editCustExpiry').value=c.expires;
+            document.getElementById('editCustDiscount').value=c.discount;
+            document.getElementById('customerEditForm').classList.remove('hidden');
+            document.getElementById('customerEditForm').scrollIntoView({behavior:'smooth'});
+        }
+        function saveCustomerEdit() {
+            const id=document.getElementById('editCustId').value;
+            const c=adminCards.find(x=>x.id===id); if(!c) return;
+            c.name=document.getElementById('editCustName').value;
+            c.phone=document.getElementById('editCustPhone').value;
+            c.type=document.getElementById('editCustType').value;
+            c.expires=document.getElementById('editCustExpiry').value;
+            c.discount=parseInt(document.getElementById('editCustDiscount').value)||c.discount;
+            if(mockCards[id]){mockCards[id].name=c.name;mockCards[id].type=c.type;mockCards[id].expires=c.expires;mockCards[id].discount=c.discount;}
+            document.getElementById('customerEditForm').classList.add('hidden');
+            renderCustomerEditList(); showToast('✅ কাস্টমার তথ্য আপডেট হয়েছে!');
+        }
+
+        // ── Agent edit ──
+        function renderAgentEditList() {
+            const c=document.getElementById('agentEditList'); if(!c) return;
+            c.innerHTML=approvedAgents.map(ag=>`
+                <div class="flex items-center gap-3 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
+                    <div class="w-9 h-9 rounded-xl bg-teal-400/10 flex items-center justify-center font-black text-teal-400 text-sm">${ag.name.charAt(0)}</div>
+                    <div class="flex-1"><p class="text-sm font-bold">${ag.name}</p><p class="text-[10px] text-gray-400">${ag.id} • ${ag.owner} • ${ag.area}</p></div>
+                    <button onclick="openAgentEdit('${ag.id}')" class="text-[10px] px-3 py-1.5 rounded-lg border border-teal-500/30 text-teal-400 bg-teal-500/10 font-bold hover:bg-teal-500/20 flex items-center gap-1">
+                        <i data-lucide="edit-2" class="w-3 h-3"></i> এডিট
+                    </button>
+                </div>`).join('');
+            lucide.createIcons();
+        }
+        function openAgentEdit(id) {
+            const ag=approvedAgents.find(x=>x.id===id); if(!ag) return;
+            document.getElementById('editAgentId').value=ag.id;
+            document.getElementById('editAgentName').value=ag.name;
+            document.getElementById('editAgentOwner').value=ag.owner;
+            document.getElementById('editAgentPhone').value=ag.phone;
+            document.getElementById('editAgentArea').value=ag.area;
+            document.getElementById('agentEditForm').classList.remove('hidden');
+            document.getElementById('agentEditForm').scrollIntoView({behavior:'smooth'});
+        }
+        function saveAgentEdit() {
+            const id=document.getElementById('editAgentId').value;
+            const ag=approvedAgents.find(x=>x.id===id); if(!ag) return;
+            ag.name=document.getElementById('editAgentName').value;
+            ag.owner=document.getElementById('editAgentOwner').value;
+            ag.phone=document.getElementById('editAgentPhone').value;
+            ag.area=document.getElementById('editAgentArea').value;
+            document.getElementById('agentEditForm').classList.add('hidden');
+            renderAgentEditList(); showToast('✅ এজেন্ট তথ্য আপডেট হয়েছে!');
+        }
+
+        // ── Sub Admin management ──
+        function renderSubAdminList() {
+            const c=document.getElementById('subAdminList'); if(!c) return;
+            const subs=adminUsers.filter(u=>u.role==='sub');
+            c.innerHTML = subs.length===0
+                ? `<p class="text-xs text-gray-500 text-center py-4">কোনো সাব-অ্যাডমিন নেই।</p>`
+                : subs.map(u=>`
+                <div class="flex items-center gap-3 p-4 bg-orange-500/5 border border-orange-500/10 rounded-xl">
+                    <div class="w-9 h-9 rounded-xl bg-orange-500/20 flex items-center justify-center font-black text-orange-400 text-sm">${u.name.charAt(0)}</div>
+                    <div class="flex-1">
+                        <p class="text-sm font-bold">${u.name} <span class="text-[10px] text-gray-400 ml-1">@${u.username}</span></p>
+                        <div class="flex flex-wrap gap-1 mt-1">
+                            ${u.permissions.map(p=>{
+                                const t=ALL_TABS.find(x=>x.id===p);
+                                return t?`<span class="text-[9px] px-2 py-0.5 bg-white/5 rounded-full text-gray-400">${t.label}</span>`:'';
+                            }).join('')}
+                        </div>
+                    </div>
+                    <button onclick="deleteSubAdmin('${u.id}')" class="text-[10px] px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 bg-red-500/10 font-bold hover:bg-red-500/20 flex items-center gap-1">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i> ডিলিট
+                    </button>
+                </div>`).join('');
+            lucide.createIcons();
+        }
+
+        function createSubAdmin() {
+            const name=document.getElementById('newSubName').value.trim();
+            const user=document.getElementById('newSubUser').value.trim();
+            const pass=document.getElementById('newSubPass').value.trim();
+            if(!name||!user||!pass){showToast('⚠️ সব তথ্য পূরণ করুন!');return;}
+            if(adminUsers.find(u=>u.username===user)){showToast('⚠️ এই Username আগেই আছে!');return;}
+            const perms=[...document.querySelectorAll('.perm-check:checked')].map(c=>c.value);
+            if(perms.length===0){showToast('⚠️ কমপক্ষে ১টি পারমিশন দিন!');return;}
+            const newAdmin={id:'SUB-'+Date.now(), username:user, password:pass, name, role:'sub', permissions:perms};
+            adminUsers.push(newAdmin);
+            ['newSubName','newSubUser','newSubPass'].forEach(f=>document.getElementById(f).value='');
+            document.querySelectorAll('.perm-check').forEach(c=>c.checked=false);
+            renderSubAdminList();
+            showToast('✅ সাব-অ্যাডমিন তৈরি: '+name);
+        }
+
+        function deleteSubAdmin(id) {
+            // Super admin নিজেকে ডিলিট করতে পারবে না, sub admin কাউকে ডিলিট করতে পারবে না
+            if(!currentAdminUser||currentAdminUser.role!=='super'){showToast('❌ শুধু Super Admin ডিলিট করতে পারবেন!');return;}
+            const u=adminUsers.find(x=>x.id===id);
+            if(!u||u.role==='super'){showToast('❌ Super Admin ডিলিট করা যাবে না!');return;}
+            adminUsers=adminUsers.filter(x=>x.id!==id);
+            renderSubAdminList();
+            showToast('🗑️ '+u.name+' ডিলিট হয়েছে।');
+        }
+
+        // URL check on load
+        window.addEventListener('DOMContentLoaded', checkAdminURL);
+
+        // Drag & drop for upload zone
+        const uploadZone = document.getElementById('uploadZone');
+        if (uploadZone) {
+            uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+            uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                const fakeEvent = { target: { files: e.dataTransfer.files } };
+                handleShopImages(fakeEvent);
+            });
+        }
+    </script>
+</body>
+</html>
